@@ -1,2 +1,2 @@
 # rancher-saas-chart
-Helm Chart for the ONZACK Rancher Software as a Service offering
+Helm Chart for ONZACK Rancher Software as a Service
