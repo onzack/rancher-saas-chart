@@ -11,11 +11,11 @@ kubectl create namespace <namespace>
 ```
 2. Create secret containing credentials for InfluxDB, if you plan to use Rancher-Guard as monitoring tool:
 ```
-kubectl -n <namespace> create secret generic dev-db-secret --from-literal=influxDBUser=<user> --from-literal=influxDBPW='<password>'
+kubectl -n <namespace> create secret generic rancher-guard-secret --from-literal=influxDBUser=<user> --from-literal=influxDBPW='<password>'
 ```
-3. Create secret containing the custom CA certificate, if you don't use the Let's Encrypt option:
+3. Create secret containing the custom CA certificate, matching the ingress TLS certificate, if you don't use the Let's Encrypt option:
 ```
-kubectl -n <namespace> create secret tls my-tls-secret --cert=<path/to/cert/file>
+kubectl -n <namespace> create secret tls custom-internal-ca --cert=<path/to/cert/file>
 ```
 
 ### Install

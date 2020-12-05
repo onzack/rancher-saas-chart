@@ -127,12 +127,12 @@ spec:
           - name: INFLUXDB_USER
             valueFrom:
               secretKeyRef:
-                name: rancher-guard-secrets
+                name: rancher-guard-secret
                 key: INFLUXDB_USER
           - name: INFLUXDB_PW
             valueFrom:
               secretKeyRef:
-                name: rancher-guard-secrets
+                name: rancher-guard-secret
                 key: INFLUXDB_PW
           - name: OKLOGTARGET
             value: {{ .Values.rancherGuard.okLogTarget }}
