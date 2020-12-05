@@ -1,0 +1,169 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rancher
+    role: server
+    version: v1
+  name: rancher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rancher
+      role: server
+      version: v1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rancher
+        role: server
+        version: v1
+    spec:
+      {{- if .Values.rancherGuard.enabled }}
+      initContainers:
+      - name: init-rancher-guard-fs
+        image: busybox:1.28
+        command: ['sh', '-c', "mkdir -p {{ .Values.storage.mountPath }}/{{ .Values.auditLog.path }} && mkdir -p {{ .Values.storage.mountPath }}/{{ .Values.rancherGuard.backupFilesPath }} && chown -R 10000:10000 {{ .Values.storage.mountPath }}/{{ .Values.rancherGuard.backupFilesPath }}"]
+        volumeMounts:
+        - mountPath: {{ .Values.storage.mountPath }}
+          name: rancher-guard
+      {{- end }}
+      containers:
+      - name: rancher
+        image: "{{ .Values.rancher.repository }}:{{ .Values.rancher.tag }}"
+        imagePullPolicy: {{ .Values.rancher.pullPolicy }}
+        args:
+          - "--k8s-mode=embedded"
+          {{- if .Values.ingress.letsEncrypt }}
+          - "--no-cacerts"
+          {{- end }}
+          - "--http-listen-port=80"
+          - "--https-listen-port=443"
+          - "--add-local={{ .Values.addLocal }}"
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            memory: {{ .Values.rancher.requests.memory | quote }}
+            cpu: {{ .Values.rancher.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.rancher.limits.memory | quote }}
+            cpu: {{ .Values.rancher.limits.cpu | quote }}
+        env:
+          - name: TZ
+            value: {{ .Values.timezone | quote }}
+          - name: AUDIT_LEVEL
+            value: {{ .Values.auditLog.level | quote }}
+          - name: AUDIT_LOG_PATH
+            value: {{ .Values.storage.mountPath }}/{{ .Values.auditLog.path }}
+          - name: AUDIT_LOG_MAXAGE
+            value: {{ .Values.auditLog.maxAge | quote }}
+          - name: AUDIT_LOG_MAXBACKUP
+            value: {{ .Values.auditLog.maxBackup | quote }}
+          - name: AUDIT_LOG_MAXSIZE
+            value: {{ .Values.auditLog.maxSize | quote }}
+        {{- if .Values.storage.enabled }}
+        volumeMounts:
+        - mountPath: /var/lib/rancher
+          name: rancher-data
+        {{- if .Values.rancherGuard.enabled }}
+        - mountPath: {{ .Values.storage.mountPath }}
+          name: rancher-guard
+        {{- end }}
+        {{- end }}
+        {{- if eq .Values.ingress.letsEncrypt false }}
+        - mountPath: /etc/rancher/ssl
+          name: custom-internal-ca
+        {{- end }}
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 30
+      {{- if .Values.rancherGuard.enabled }}
+      - name: rancher-guard
+        image: "{{ .Values.rancherGuard.repository }}:{{ .Values.rancherGuard.tag }}"
+        imagePullPolicy: {{ .Values.rancherGuard.pullPolicy }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            memory: {{ .Values.rancherGuard.requests.memory | quote }}
+            cpu: {{ .Values.rancherGuard.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.rancherGuard.limits.memory | quote }}
+            cpu: {{ .Values.rancherGuard.limits.cpu | quote }}
+        env:
+          - name: RANCHER_INSTANCE_NAME
+            value: {{ .Values.rancher.instanceName }}
+          - name: TZ
+            value: {{ .Values.timezone | quote }}
+          - name: MOUNTPATH
+            value: {{ .Values.storage.mountPath }}
+          - name: BACKUPFILESPATH
+            value: {{ .Values.storage.mountPath }}/{{ .Values.rancherGuard.backupFilesPath }}
+          - name: INFLUXDB_URL
+            value: {{ .Values.rancherGuard.influxDBUrl | quote }}
+          - name: INFLUXDB_PORT
+            value: {{ .Values.rancherGuard.influxDBPort | quote }}
+          - name: INFLUXDB_NAME
+            value: {{ .Values.rancherGuard.influxDBName }}
+          - name: INFLUXDB_USER
+            valueFrom:
+              secretKeyRef:
+                name: rancher-guard-secrets
+                key: INFLUXDB_USER
+          - name: INFLUXDB_PW
+            valueFrom:
+              secretKeyRef:
+                name: rancher-guard-secrets
+                key: INFLUXDB_PW
+          - name: OKLOGTARGET
+            value: {{ .Values.rancherGuard.okLogTarget }}
+          - name: ERRORLOGTARGET
+            value: {{ .Values.rancherGuard.errorLogTarget }}
+          - name: METRICSFILE
+            value: {{ .Values.rancherGuard.metricsFile }}
+        {{- if .Values.storage.enabled }}
+        volumeMounts:
+        - mountPath: /var/lib/rancher
+          name: rancher-data
+        - mountPath: {{ .Values.storage.mountPath }}
+          name: rancher-guard
+        {{- end }}
+      {{- end }}
+      {{- if .Values.storage.enabled }}
+      volumes:
+      - name: rancher-data
+        persistentVolumeClaim:
+          claimName: rancher-data-{{ .Values.rancher.instanceName }}
+      {{- if .Values.rancherGuard.enabled }}
+      - name: rancher-guard
+        persistentVolumeClaim:
+          claimName: rancher-guard-{{ .Values.rancher.instanceName }}
+      {{- end }}
+      {{- end }}
+      {{- if eq .Values.ingress.letsEncrypt false }}
+      - name: custom-internal-ca
+        secret:
+          secretName: custom-internal-ca
+          items:
+          - key: cacerts.pem
+            path: cacerts.pem
+      {{- end }}

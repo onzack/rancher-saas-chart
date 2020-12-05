@@ -1,0 +1,74 @@
+categories:
+- ONZACK-Apps
+questions:
+- variable: rancher.instanceName
+  default: "rancher-saas-dev"
+  description: "Rancher SaaS instance name, only characters compatible with DNS allowed"
+  type: string
+  group: "Ingress"
+  required: true
+  label: Rancher SaaS instance name
+- variable: ingress.letsEncrypt
+  default: false
+  description: "Enable Let's Encrypt certificates"
+  type: boolean
+  group: "Ingress"
+  required: true
+  label: Let's Encrypt
+  show_subquestion_if: false
+  subquestions:
+    - variable: ingress.secretName
+      default: "wildcard-ingress-certificate"
+      description: "Secret for the ingress TLS certificates"
+      type: string
+      label: Ingress TLS secret
+- variable: ingress.domain
+  default: "rancher.example.com"
+  description: "Domain for the ingress host, added next to instanceName"
+  type: string
+  group: "Ingress"
+  required: true
+  label: Rancher SaaS domain
+- variable: rancherGuard.enabled
+  default: true
+  description: "Enable Rancher Guard monitoring and backup"
+  type: boolean
+  group: "Maintenance"
+  required: true
+  label: Rancher Guard
+  show_subquestion_if: true
+  subquestions:
+    - variable: rancherGuard.influxDBUrl
+      default: "http://influxdb.example.com"
+      description: "URL to InfluxDB for the Rancher-Guard metrics, HTTPS not yet supported"
+      type: string
+      label: InfluxDB URL
+    - variable: rancherGuard.influxDBName
+      default: "rancherguard"
+      description: "Name of the InfluxDB database"
+      type: string
+      label: InfluxDB database
+- variable: storage.enabled
+  default: true
+  description: "Enable storage for Rancher"
+  type: boolean
+  group: "Storage"
+  required: true
+  label: Storage
+  show_subquestion_if: true
+  subquestions:
+    - variable: storage.storageClassName
+      default: "longhorn"
+      description: "Storage Class"
+      type: string
+      label: Storage Class
+    - variable: storage.dataSize
+      default: "4Gi"
+      description: "Rancher Persistent Storage Size"
+      type: string
+      label: Rancher Storage Sizie
+    - variable: storage.rancherGuardSize
+      default: "5Gi"
+      description: "RancherGuard Persistent Storage Size"
+      type: string
+      label: RancherGaurd Storage Size
