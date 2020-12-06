@@ -59,16 +59,16 @@ questions:
   subquestions:
     - variable: storage.storageClassName
       default: "longhorn"
-      description: "Storage Class"
+      description: "Storage Class, for example longhorn"
       type: string
       label: Storage Class
     - variable: storage.dataSize
-      default: "4Gi"
+      default: "5Gi"
       description: "Rancher Persistent Storage Size"
       type: string
       label: Rancher Storage Sizie
     - variable: storage.rancherGuardSize
-      default: "5Gi"
+      default: "4Gi"
       description: "RancherGuard Persistent Storage Size"
       type: string
       label: RancherGaurd Storage Size

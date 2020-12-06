@@ -31,9 +31,11 @@ rancherGuard:
   limits:
     memory: 40Mi
     cpu: 400m
-  influxDBUrl: <URL to IfluxDB, e.g. http://influxdb.example.com>
+  # InfluxDB URL, e.g. http://influxdb.example.com
+  influxDBUrl:
+  # InfluxDB Port, only non encryptet ports supported at the moment
   influxDBPort: 80
-  influxDBName: <DB name, e.g. rancherguard>
+  influxDBName:
   influxDBUser: REDACTED
   influxDBPW: REDACTED
   okLogTarget: /proc/1/fd/1
@@ -43,9 +45,9 @@ rancherGuard:
 storage:
   enabled: true
   mountPath: /mnt/rancher-guard
-  dataSize: 4Gi
-  rancherGuardSize: 5Gi
-  storageClassName: <storageClassName>
+  dataSize: 5Gi
+  rancherGuardSize: 4Gi
+  storageClassName:
 
 auditLog:
   path: auditlog/
@@ -56,5 +58,7 @@ auditLog:
 
 ingress:
   letsEncrypt: false
-  domain: <domain for ingress host, added to instanceName>
-  secretName: <secret for ingress TLS cert>
+  # Domain for ingress host, added to instanceName
+  domain:
+  # Secret for ingress TLS cert
+  secretName:
