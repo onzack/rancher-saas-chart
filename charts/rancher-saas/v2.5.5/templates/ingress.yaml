@@ -10,14 +10,14 @@ spec:
   rules:
   - host: "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
     http:
-    paths:
-    - path: /
-      pathType: Prefix
-      backend:
-        service:
-          name: rancher
-          port:
-            number: 80
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rancher
+            port:
+              number: 80
   tls:
     - hosts:
       - "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
