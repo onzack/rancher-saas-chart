@@ -34,7 +34,7 @@ helm install -f custom-values.yaml -n <namespace> <instalnceName> ./rancher-saas
 ```
 
 # Licence
-Copyright 2020 ONZACK Ltd
+Copyright 2021 ONZACK AG
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
