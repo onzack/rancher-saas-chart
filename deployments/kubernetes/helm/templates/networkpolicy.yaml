@@ -6,7 +6,6 @@ spec:
   podSelector:
     matchLabels:
       app: rancher
-      role: server
   policyTypes:
   - Ingress
   - Egress

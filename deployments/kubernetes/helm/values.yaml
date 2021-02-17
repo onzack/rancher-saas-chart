@@ -7,23 +7,22 @@ timezone: "Europe/Zurich"
 rancher:
   instanceName: "rancher-saas-dev"
   repository: rancher/rancher
-  tag: v2.5.3
-  pullPolicy: IfNotPresent
-  requests:
-    memory: 800Mi
-    cpu: 150m
-  limits:
-    memory: 2.5Gi
-    cpu: 600m
+  tag: v2.4.14
+  ## The following values are defined in the size-[S|M|L].yaml files
+  # requests:
+  #   memory: 800Mi
+  #   cpu: 150m
+  # limits:
+  #   memory: 2.5Gi
+  #   cpu: 600m
 
 # As of Rancher v2.5.0 this flag is deprecated and must be set to 'true' in order for Rancher to start
 addLocal: "true"
 
 rancherGuard:
-  enabled: true
+  enabled: false
   repository: quay.io/rancher-guard
   tag: v2020-09-beta1
-  pullPolicy: IfNotPresent
   backupFilesPath: backups
   requests:
     memory: 15Mi
@@ -43,10 +42,11 @@ rancherGuard:
   metricsFile: /tmp/metrics.txt
 
 storage:
-  enabled: true
-  mountPath: /mnt/rancher-guard
-  dataSize: 5Gi
-  rancherGuardSize: 4Gi
+  enabled: false
+  rancherGuardVolumeMountPath: /mnt/rancher-guard
+  ## The following values are defined in the size-[S|M|L].yaml files
+  # rancherVolumeSize: 5Gi
+  # rancherGuardVolumeSize: 4Gi
   storageClassName:
 
 auditLog:
@@ -57,7 +57,8 @@ auditLog:
   maxSize: 100
 
 ingress:
-  letsEncrypt: false
+  letsEncrypt:
+    enabled: false
   # Domain for ingress host, added to instanceName
   domain:
   # Secret for ingress TLS cert

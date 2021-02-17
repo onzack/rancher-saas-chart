@@ -1,40 +1,32 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  labels:
-    app: rancher
-    role: server
-    version: v1
   name: rancher
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: rancher
-      role: server
-      version: v1
-  strategy:
-    type: Recreate
+  serviceName: "rancher"
+  replicas: 1
   template:
     metadata:
       labels:
         app: rancher
-        role: server
-        version: v1
     spec:
-      {{- if .Values.rancherGuard.enabled }}
+      terminationGracePeriodSeconds: 60
+            {{- if .Values.rancherGuard.enabled }}
       initContainers:
       - name: init-rancher-guard-fs
         image: busybox:1.28
-        command: ['sh', '-c', "mkdir -p {{ .Values.storage.mountPath }}/{{ .Values.auditLog.path }} && mkdir -p {{ .Values.storage.mountPath }}/{{ .Values.rancherGuard.backupFilesPath }} && chown -R 10000:10000 {{ .Values.storage.mountPath }}/{{ .Values.rancherGuard.backupFilesPath }}"]
+        command: ['sh', '-c', "mkdir -p {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.auditLog.path }} && mkdir -p {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.rancherGuard.backupFilesPath }} && chown -R 10000:10000 {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.rancherGuard.backupFilesPath }}"]
         volumeMounts:
-        - mountPath: {{ .Values.storage.mountPath }}
+        - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
           name: rancher-guard
       {{- end }}
       containers:
       - name: rancher
         image: "{{ .Values.rancher.repository }}:{{ .Values.rancher.tag }}"
-        imagePullPolicy: {{ .Values.rancher.pullPolicy }}
+        imagePullPolicy: IfNotPresent
         args:
           - "--k8s-mode=embedded"
           {{- if .Values.ingress.letsEncrypt }}
@@ -70,11 +62,11 @@ spec:
         - mountPath: /var/lib/rancher
           name: rancher-data
         {{- if .Values.rancherGuard.enabled }}
-        - mountPath: {{ .Values.storage.mountPath }}
+        - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
           name: rancher-guard
         {{- end }}
         {{- end }}
-        {{- if eq .Values.ingress.letsEncrypt false }}
+        {{- if .Values.ingress.letsEncrypt.enabled }}
         - mountPath: /etc/rancher/ssl
           name: custom-internal-ca
         {{- end }}
@@ -96,7 +88,7 @@ spec:
       {{- if .Values.rancherGuard.enabled }}
       - name: rancher-guard
         image: "{{ .Values.rancherGuard.repository }}:{{ .Values.rancherGuard.tag }}"
-        imagePullPolicy: {{ .Values.rancherGuard.pullPolicy }}
+        imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -143,23 +135,13 @@ spec:
         {{- if .Values.storage.enabled }}
         volumeMounts:
         - mountPath: /var/lib/rancher
-          name: rancher-data
-        - mountPath: {{ .Values.storage.mountPath }}
-          name: rancher-guard
+          name: rancher-volume
+        - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
+          name: rancher-guard-volume
         {{- end }}
       {{- end }}
       {{- if .Values.storage.enabled }}
       volumes:
-      - name: rancher-data
-        persistentVolumeClaim:
-          claimName: rancher-data-{{ .Values.rancher.instanceName }}
-      {{- if .Values.rancherGuard.enabled }}
-      - name: rancher-guard
-        persistentVolumeClaim:
-          claimName: rancher-guard-{{ .Values.rancher.instanceName }}
-      {{- end }}
-      {{- end }}
-      {{- if eq .Values.ingress.letsEncrypt false }}
       - name: custom-internal-ca
         secret:
           secretName: custom-internal-ca
@@ -167,3 +149,24 @@ spec:
           - key: cacerts.pem
             path: cacerts.pem
       {{- end }}
+  {{- if .Values.storage.enabled }}    
+  volumeClaimTemplates:
+  - metadata:
+      name: rancher-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.storage.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.storage.rancherVolumeSize }}
+  {{- if .Values.rancherGuard.enabled }}
+  - metadata:
+      name: rancher-guard-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.storage.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.storage.rancherGuardVolumeSize }}
+  {{- end }}
+  {{- end }}

@@ -25,12 +25,12 @@ git clone https://github.com/onzack/rancher-saas-chart.git
 ```
 2. Adjust values.yaml file:
 ```
-cp ./rancher-saas-chart/charts/rancher-saas/<version>/values.yaml ./custom-values.yaml
+cp ./deployments/kubernetes/helm/values.yaml ./custom-values.yaml
 vim ./custom-values.yaml
 ```
 3. Install Helm Chart:
 ```
-helm install -f custom-values.yaml -n <namespace> <instalnceName> ./rancher-saas-chart/charts/rancher-saas/<version>
+helm install -f custom-values.yaml -f size-[S|M|L].yaml -n <namespace> <instalnceName> ./deployments/kubernetes/helm
 ```
 
 # Licence
