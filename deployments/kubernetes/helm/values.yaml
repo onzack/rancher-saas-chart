@@ -8,6 +8,7 @@ rancher:
   instanceName: "rancher-saas-dev"
   repository: rancher/rancher
   tag: v2.4.14
+  twoPointFive: false
   ## The following values are defined in the size-[S|M|L].yaml files
   # requests:
   #   memory: 800Mi
@@ -16,10 +17,8 @@ rancher:
   #   memory: 2.5Gi
   #   cpu: 600m
 
-# As of Rancher v2.5.0 this flag is deprecated and must be set to 'true' in order for Rancher to start
-addLocal: "true"
-
 rancherGuard:
+  # You can only enable rancherGuard, if storage is enabled aswell
   enabled: false
   repository: quay.io/rancher-guard
   tag: v2020-09-beta1
@@ -35,6 +34,7 @@ rancherGuard:
   # InfluxDB Port, only non encryptet ports supported at the moment
   influxDBPort: 80
   influxDBName:
+  secretName: rancher-guard-secret
   influxDBUser: REDACTED
   influxDBPW: REDACTED
   okLogTarget: /proc/1/fd/1
@@ -47,7 +47,9 @@ storage:
   ## The following values are defined in the size-[S|M|L].yaml files
   # rancherVolumeSize: 5Gi
   # rancherGuardVolumeSize: 4Gi
-  storageClassName:
+  rancherVolumeName: rancher-volume
+  rancherGuardVolumeName: rancher-guard-volume
+  storageClassName: longhorn
 
 auditLog:
   path: auditlog/
@@ -60,6 +62,10 @@ ingress:
   letsEncrypt:
     enabled: false
   # Domain for ingress host, added to instanceName
-  domain:
-  # Secret for ingress TLS cert
-  secretName:
+  domain: example.com
+  # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
+  TLSsecretName: custom-ingress-tls
+  TLSkey: REDACTED
+  TLScert: REDACTED
+  CAsecretName: custom-ingress-ca
+  CAcert: REDACTED

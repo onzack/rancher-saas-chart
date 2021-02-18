@@ -14,14 +14,14 @@ spec:
         app: rancher
     spec:
       terminationGracePeriodSeconds: 60
-            {{- if .Values.rancherGuard.enabled }}
+      {{- if .Values.rancherGuard.enabled }}
       initContainers:
       - name: init-rancher-guard-fs
         image: busybox:1.28
         command: ['sh', '-c', "mkdir -p {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.auditLog.path }} && mkdir -p {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.rancherGuard.backupFilesPath }} && chown -R 10000:10000 {{ .Values.storage.rancherGuardVolumeMountPath }}/{{ .Values.rancherGuard.backupFilesPath }}"]
         volumeMounts:
         - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
-          name: rancher-guard
+          name: {{ .Values.storage.rancherGuardVolumeName }}
       {{- end }}
       containers:
       - name: rancher
@@ -29,14 +29,18 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - "--k8s-mode=embedded"
-          {{- if .Values.ingress.letsEncrypt }}
+          {{- if .Values.rancher.twoPointFive }}
+          {{- if .Values.ingress.letsEncrypt.enabled }}
           - "--no-cacerts"
           {{- end }}
           - "--http-listen-port=80"
           - "--https-listen-port=443"
-          - "--add-local={{ .Values.addLocal }}"
+          - "--add-local=true"
+          {{- end }}
+        {{- if .Values.rancher.twoPointFive }}
         securityContext:
           privileged: true
+        {{- end }}
         resources:
           requests:
             memory: {{ .Values.rancher.requests.memory | quote }}
@@ -57,18 +61,20 @@ spec:
             value: {{ .Values.auditLog.maxBackup | quote }}
           - name: AUDIT_LOG_MAXSIZE
             value: {{ .Values.auditLog.maxSize | quote }}
-        {{- if .Values.storage.enabled }}
+        {{- if or .Values.storage.enabled ( eq .Values.ingress.letsEncrypt.enabled false ) }}
         volumeMounts:
+        {{- end }}
+        {{- if .Values.storage.enabled }}
         - mountPath: /var/lib/rancher
-          name: rancher-data
+          name: {{ .Values.storage.rancherVolumeName }}
+        {{- end }}
         {{- if .Values.rancherGuard.enabled }}
         - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
-          name: rancher-guard
+          name: {{ .Values.storage.rancherGuardVolumeName }}
         {{- end }}
-        {{- end }}
-        {{- if .Values.ingress.letsEncrypt.enabled }}
+        {{- if eq .Values.ingress.letsEncrypt.enabled false }}
         - mountPath: /etc/rancher/ssl
-          name: custom-internal-ca
+          name: {{ .Values.ingress.CAsecretName }}
         {{- end }}
         ports:
         - containerPort: 80
@@ -119,12 +125,12 @@ spec:
           - name: INFLUXDB_USER
             valueFrom:
               secretKeyRef:
-                name: rancher-guard-secret
+                name: {{ .Values.rancherGuard.secretName }}
                 key: INFLUXDB_USER
           - name: INFLUXDB_PW
             valueFrom:
               secretKeyRef:
-                name: rancher-guard-secret
+                name: {{ .Values.rancherGuard.secretName }}
                 key: INFLUXDB_PW
           - name: OKLOGTARGET
             value: {{ .Values.rancherGuard.okLogTarget }}
@@ -132,19 +138,17 @@ spec:
             value: {{ .Values.rancherGuard.errorLogTarget }}
           - name: METRICSFILE
             value: {{ .Values.rancherGuard.metricsFile }}
-        {{- if .Values.storage.enabled }}
         volumeMounts:
         - mountPath: /var/lib/rancher
-          name: rancher-volume
+          name: {{ .Values.storage.rancherVolumeName }}
         - mountPath: {{ .Values.storage.rancherGuardVolumeMountPath }}
-          name: rancher-guard-volume
-        {{- end }}
+          name: {{ .Values.storage.rancherGuardVolumeName }}
       {{- end }}
-      {{- if .Values.storage.enabled }}
+      {{- if eq .Values.ingress.letsEncrypt.enabled false }}
       volumes:
-      - name: custom-internal-ca
+      - name: {{ .Values.ingress.CAsecretName }}
         secret:
-          secretName: custom-internal-ca
+          secretName: {{ .Values.ingress.CAsecretName }}
           items:
           - key: cacerts.pem
             path: cacerts.pem
@@ -152,7 +156,7 @@ spec:
   {{- if .Values.storage.enabled }}    
   volumeClaimTemplates:
   - metadata:
-      name: rancher-volume
+      name: {{ .Values.storage.rancherVolumeName }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ .Values.storage.storageClassName }}
@@ -161,7 +165,7 @@ spec:
           storage: {{ .Values.storage.rancherVolumeSize }}
   {{- if .Values.rancherGuard.enabled }}
   - metadata:
-      name: rancher-guard-volume
+      name: {{ .Values.storage.rancherGuardVolumeName }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ .Values.storage.storageClassName }}

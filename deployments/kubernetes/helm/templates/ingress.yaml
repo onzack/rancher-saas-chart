@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: rancher
-  {{- if .Values.ingress.letsEncrypt }}
+  {{- if .Values.ingress.letsEncrypt.enabled }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   {{- end }}
@@ -21,8 +21,8 @@ spec:
   tls:
     - hosts:
       - "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
-      {{- if .Values.ingress.letsEncrypt }}
-      secretName: {{ .Values.rancher.instanceName }}-letsencrypt
+      {{- if .Values.ingress.letsEncrypt.enabled }}
+      secretName: letsencrypt-ingress-tls
       {{- else }}
-      secretName: {{ .Values.ingress.secretName }}
+      secretName: {{ .Values.ingress.TLSsecretName }}
       {{- end }}
