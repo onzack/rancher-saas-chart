@@ -8,8 +8,8 @@ spec:
       app: rancher
   serviceName: "rancher"
   replicas: 1
-  strategy:
-    type: Recreate
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
