@@ -1,0 +1,14 @@
+[
+  {
+    "id": "health",
+    "execute-command": "/opt/webhook-scripts/health.bash",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command":
+    [
+      {
+        "source": "payload",
+        "name": "component"
+      }
+    ]
+  }
+]
