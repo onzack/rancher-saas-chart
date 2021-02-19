@@ -5,7 +5,6 @@ metadata:
 spec:
   selector:
     app: rancher
-    role: server
   ports:
   - name: hattp
     protocol: TCP
