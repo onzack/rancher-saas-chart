@@ -31,53 +31,86 @@ STATUS="undefined"
 ## Check for needed files
 if [ ! -f $ENVIRONMENT_VALUES_FILE ]
   then
-    echo "ERROR - Job-ID: $4, Environment values file does not exist" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment values file does not exist" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment values file does not exist" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 ## Check for needed environment variables
 if [[ ! -v ENVIRONMENT_VALUES_FILE ]]
   then
-    echo "ERROR - Job-ID: $4, Environment variable ENVIRONMENT_VALUES_FILE not set" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment variable ENVIRONMENT_VALUES_FILE not set" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment variable ENVIRONMENT_VALUES_FILE not set" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 ]]
   then
-    echo "ERROR - Job-ID: $4, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 not set" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 not set" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 not set" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 ]]
   then
-    echo "ERROR - Job-ID: $4, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 not set" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 not set" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment variable WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 not set" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 if [[ ! -v LAB_ONZACK_IO_CA_BASE64 ]]
   then
-    echo "ERROR - Job-ID: $4, Environment variable LAB_ONZACK_IO_CA_BASE64 not set" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment variable LAB_ONZACK_IO_CA_BASE64 not set" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment variable LAB_ONZACK_IO_CA_BASE64 not set" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 if [[ ! -v DOMAIN ]]
   then
-    echo "ERROR - Job-ID: $4, Environment variable DOMAIN not set" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Environment variable DOMAIN not set" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Environment variable DOMAIN not set" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
 ## Check needed arguments
 if [ "$#" -ne 4 ]; then
+  if [ -z "$4" ]; then
+    echo "ERROR - Job-ID: 0, Not enougth arguments passed, expected 4 got $#" > $ERRORLOGTARGET
+    echo "ERROR - Job-ID: 0, Pass the following arguments: instance-name, size, password, job-id" > $ERRORLOGTARGET
+  else
     echo "ERROR - Job-ID: $4, Not enougth arguments passed, expected 4 got $#" > $ERRORLOGTARGET
     echo "ERROR - Job-ID: $4, Pass the following arguments: instance-name, size, password, job-id" > $ERRORLOGTARGET
-    STATUS="error"
+  fi
+  STATUS="error"
 fi
 
 ## Check kube-api connection
 kubectl get endpoints -n default kubernetes >> /dev/null
 if (( $? != "0" ))
   then
-    echo "ERROR - Job-ID: $4, Not able to connect to kube-api" > $ERRORLOGTARGET
+    if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Not able to connect to kube-api" > $ERRORLOGTARGET
+    else
+      echo "ERROR - Job-ID: $4, Not able to connect to kube-api" > $ERRORLOGTARGET
+    fi
     STATUS="error"
 fi
 
@@ -85,10 +118,11 @@ fi
 if [ "$STATUS" == "error" ]; then
     ENDTIME=$(date +%s.%N)
     DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
-    echo "ERROR - Job-ID: $4, Something with the configuration is wrong, duration $DURATION seconds" > $ERRORLOGTARGET
     if [ -z "$4" ]; then
+      echo "ERROR - Job-ID: 0, Something with the configuration is wrong, duration $DURATION seconds" > $ERRORLOGTARGET
       echo "{ "job-id":"0", "status":"error", "duration":"$DURATION", "message":"Configuration not correct" }"
     else
+      echo "ERROR - Job-ID: $4, Something with the configuration is wrong, duration $DURATION seconds" > $ERRORLOGTARGET
       echo "{ "job-id":"$4", "status":"error", "duration":"$DURATION", "message":"Configuration not correct" }"
     fi
     exit 1
@@ -119,8 +153,8 @@ if (( $? != "0" ))
     echo "OK - Job-ID: $4, Run Helm command was successfull" > $OKLOGTARGET
 fi
 
-echo "INFO - Job-ID: $4, Start waiting for Rancher $1 go get ready" > $OKLOGTARGET
 ## Wait 5 minutes for Rancher go get ready
+echo "INFO - Job-ID: $4, Start waiting for Rancher $1 go get ready" > $OKLOGTARGET
 HEALTH="notok"
 TRY="360"
 while (( $TRY > 0 ))
@@ -128,6 +162,34 @@ while (( $TRY > 0 ))
     HEALTH=$(curl -k -s https://$1.$DOMAIN/healthz | head -n 1)
     # echo "DEBUG - The HEALT environment varialbe is: $HEALTH"
     if [ "$HEALTH" == "ok" ]; then
+      # # Get Rancher login token
+      # echo "INFO - Job-ID: $4, Get Rancher login token" > $OKLOGTARGET
+      # LOGINRESPONSE="undefinde"
+      # LOGINTOKEN="undefinde"
+      # LOGINRESPONSE=`curl -s 'https://$1.$DOMAIN/v3-public/localProviders/local?action=login' \
+      #   -H 'content-type: application/json' \
+      #   --data-binary '{"username":"admin","password":"admin"}' \
+      #   --insecure`
+      # LOGINTOKEN=`echo $LOGINRESPONSE | jq -r .token`
+      # echo "DEBUG - Job-ID: $4, Rancher login token: $LOGINTOKEN" > $OKLOGTARGET
+      # 
+      # # Set Rancher admin password
+      # echo "INFO - Job-ID: $4, Set Rancher admin password" > $OKLOGTARGET
+      # curl -s 'https://$1.$DOMAIN/v3/users?action=changepassword' \
+      #   -H 'content-type: application/json' \
+      #   -H "Authorization: Bearer $LOGINTOKEN" \
+      #   --data-binary '{"currentPassword":"admin","newPassword":"$3"}' \
+      #   --insecure
+      # 
+      # # Set Rancher URL
+      # echo "INFO - Job-ID: $4, Set Rancher URL" > $OKLOGTARGET
+      # curl -s 'https://$1.$DOMAIN/v3/settings/server-url' \
+      #   -H 'content-type: application/json' \
+      #   -H "Authorization: Bearer $LOGINTOKEN" \
+      #   -X PUT \
+      #   --data-binary '{"name":"server-url","value":"'$1.$DOMAIN'"}' \
+      #   --insecure
+      # 
       ENDTIME=$(date +%s.%N)
       DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
       echo "OK - Job-ID: $4, Rancher $1 is up and running, duration $DURATION seconds" > $OKLOGTARGET
@@ -139,6 +201,7 @@ while (( $TRY > 0 ))
       TRY=$(($TRY - 5))
     fi
 done
+
 ENDTIME=$(date +%s.%N)
 DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
 echo "ERROR - Job-ID: $4, Time out while waiting for Rancher $1, duration $DURATION seconds" > $OKLOGTARGET
