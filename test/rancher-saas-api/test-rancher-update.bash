@@ -15,5 +15,5 @@ if [ ! -f $ENVIRONMENT_VALUES_FILE ]
 fi
 
 cp -rp ./deployments/kubernetes/helm /etc/rancher-saas/helm
-./build/package/rancher-saas-api/webhook-scripts/deploy-or-update.bash $1 $2 $3 $4
+./build/package/rancher-saas-api/webhook-scripts/update-rancher.bash $1 $2 $3
 rm -rf /etc/rancher-saas/helm

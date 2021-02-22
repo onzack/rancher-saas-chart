@@ -1,7 +1,7 @@
 [
   {
     "id": "health",
-    "execute-command": "/opt/webhook-scripts/health.bash",
+    "execute-command": "/opt/webhook-scripts/deploy-rancher.bash",
     "include-command-output-in-response": true,
     "pass-arguments-to-command":
     [

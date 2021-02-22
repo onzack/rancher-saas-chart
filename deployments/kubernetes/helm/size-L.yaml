@@ -4,7 +4,7 @@
 
 rancher:
   requests:
-    memory: 1.4Gi
+    memory: 1400M
     cpu: 200m
   limits:
     memory: 8Gi
