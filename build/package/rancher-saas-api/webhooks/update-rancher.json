@@ -1,14 +1,35 @@
 [
   {
-    "id": "health",
-    "execute-command": "/opt/webhook-scripts/deploy-rancher.bash",
+    "id": "update",
+    "execute-command": "/opt/webhook-scripts/update-rancher.bash",
     "include-command-output-in-response": true,
     "pass-arguments-to-command":
     [
       {
         "source": "payload",
-        "name": "component"
+        "name": "instance_name"
+      },
+      {
+        "source": "payload",
+        "name": "instance_size"
+      },
+      {
+        "source": "payload",
+        "name": "job_id"
       }
-    ]
+    ],
+    "trigger-rule":
+    {
+      "match":
+      {
+        "type": "value",
+        "value": "<YOUR-GENERATED-TOKEN>",
+        "parameter":
+        {
+          "source": "payload",
+          "name": "token"
+        }
+      }
+    }
   }
 ]

@@ -14,6 +14,6 @@ if [ ! -f $ENVIRONMENT_VALUES_FILE ]
     exit 1
 fi
 
-cp -rp ./deployments/kubernetes/helm /etc/rancher-saas/helm
+cp -rp ./deployments/kubernetes/helm/rancher-saas /etc/rancher-saas/helm
 ./build/package/rancher-saas-api/webhook-scripts/deploy-rancher.bash $1 $2 $3 $4
 rm -rf /etc/rancher-saas/helm
