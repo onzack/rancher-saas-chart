@@ -62,9 +62,11 @@ oklog () {
 returnlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "{ \"job-id\":\"0\", \"status\":\"$STATUS\", \"duration\":\"$DURATION\", \"message\":\"$MESSAGE\" }"
+    # duration as milliseconds
+    # stati: error, deploying
+    echo "{ \"job-id\":0, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
   else
-    echo "{ \"job-id\":\"$JOB_ID\", \"status\":\"$STATUS\", \"duration\":\"$DURATION\", \"message\":\"$MESSAGE\" }"
+    echo "{ \"job-id\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
   fi
 }
 
@@ -142,6 +144,7 @@ helm upgrade --install --create-namespace -n $INSTANCE_NAME \
   --set rancher.instanceName=$INSTANCE_NAME \
   --set ingress.domain=$DOMAIN \
   $INSTANCE_NAME /etc/rancher-saas/helm >> /dev/null
+##################################################3 --> API return value
 
 # Check if Helm was successfull
 if (( $? != "0" )); then
