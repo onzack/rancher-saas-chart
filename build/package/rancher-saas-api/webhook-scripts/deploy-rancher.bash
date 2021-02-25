@@ -1,13 +1,15 @@
 #!/bin/bash
 
-STARTTIME=$(date +%s.%N)
+STARTTIME=$(date +%s%3N)
 
 ## Expected environment variables
 # ENVIRONMENT_VALUES_FILE
-# WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64
-# WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64
-# LAB_ONZACK_IO_CA_BASE64
+# INGRESS_KEY_BASE64
+# INGRESS_CRT_BASE64
+# INGRESS_CA_CRT_BASE64
 # DOMAIN
+# RANCHER_CLUSTER_ID
+# RANCHER_PROJECT_ID
 
 ## Expected arguments
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
@@ -36,16 +38,16 @@ STATUS="undefined"
 
 ## Define functions
 setduration () {
-  local ENDTIME=$(date +%s.%N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
+  local ENDTIME=$(date +%s%3N)
+  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
 }
 
 errorlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "ERROR - Job-ID: 0, $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: 0 - ERROR - $MESSAGE" > $ERRORLOGTARGET
   else
-    echo "ERROR - Job-ID: $JOB_ID, $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: $JOB_ID - ERROR - $MESSAGE" > $ERRORLOGTARGET
   fi
 }
 
@@ -53,21 +55,27 @@ oklog () {
   local TYPE="$1"
   local MESSAGE="$2"
   if [ -z "$JOB_ID" ]; then
-    echo "$TYPE - Job-ID: 0, $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: 0 - $TYPE - $MESSAGE" > $OKLOGTARGET
   else
-    echo "$TYPE - Job-ID: $JOB_ID, $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: $JOB_ID - $TYPE - $MESSAGE" > $OKLOGTARGET
   fi
 }
 
 returnlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    # duration as milliseconds
-    # stati: error, deploying
-    echo "{ \"job-id\":0, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
+    # duration as millims
+    # status: error, deploying
+    echo "{ \"jobId\":0, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
   else
-    echo "{ \"job-id\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
+    echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
   fi
+}
+
+cleanup () {
+  unset LOGINRESPONSE
+  unset LOGINTOKEN
+  unset USERID
 }
 
 ## Check for needed files
@@ -84,28 +92,40 @@ if [[ ! -v ENVIRONMENT_VALUES_FILE ]]
     errorlog "Environment variable ENVIRONMENT_VALUES_FILE not set"
 fi
 
-if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 ]]
+if [[ ! -v INGRESS_KEY_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 not set"
+    errorlog "Environment variable INGRESS_KEY_BASE64 not set"
 fi
 
-if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 ]]
+if [[ ! -v INGRESS_CRT_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 not set"
+    errorlog "Environment variable INGRESS_CRT_BASE64 not set"
 fi
 
-if [[ ! -v LAB_ONZACK_IO_CA_BASE64 ]]
+if [[ ! -v INGRESS_CA_CRT_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable LAB_ONZACK_IO_CA_BASE64 not set"
+    errorlog "Environment variable INGRESS_CA_CRT_BASE64 not set"
 fi
 
 if [[ ! -v DOMAIN ]]
   then
     STATUS="error"
     errorlog "Environment variable DOMAIN not set"
+fi
+
+if [[ ! -v RANCHER_CLUSTER_ID ]]
+  then
+    STATUS="error"
+    errorlog "Environment variable RANCHER_CLUSTER_ID not set"
+fi
+
+if [[ ! -v RANCHER_PROJECT_ID ]]
+  then
+    STATUS="error"
+    errorlog "Environment variable RANCHER_PROJECT_ID not set"
 fi
 
 ## Check needed arguments
@@ -127,34 +147,61 @@ fi
 if [ "$STATUS" == "error" ]; then
   STATUS="error"
   setduration
-  errorlog "Something with the configuration is wrong, duration $DURATION seconds"
+  errorlog "Something with the configuration is wrong, duration $DURATION ms"
   returnlog "Configuration not correct"
   exit 1
 fi
 
 ## The actual script
+# Create Namespace
+oklog "INFO" "Create namespace $INSTANCE_NAME"
+cat << EOF | kubectl apply -f - >> /dev/null
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    field.cattle.io/projectId: $RANCHER_CLUSTER_ID:$RANCHER_PROJECT_ID
+  labels:
+    field.cattle.io/projectId: $RANCHER_PROJECT_ID
+    name: rancher-saas-dev
+  name: $INSTANCE_NAME
+EOF
+if (( $? != "0" )); then
+  STATUS="error"
+  setduration
+  errorlog "Create namespace $INSTANCE_NAME not successully, duration $DURATION ms"
+  returnlog "Create namespace $INSTANCE_NAME not successfull"
+  exit 1
+else
+  STATUS="deploying"
+  setduration
+  oklog "OK" "Successfully created namespace $INSTANCE_NAME"
+fi
+
 # Deploy Rancher SaaS with Helm
-oklog "INFO" "All Checks are OK, run Helm command"
-helm upgrade --install --create-namespace -n $INSTANCE_NAME \
+oklog "INFO" "All Checks are OK, run Helm install"
+helm upgrade --install -n $INSTANCE_NAME \
   -f /etc/rancher-saas/helm/size-$SIZE.yaml \
   -f $ENVIRONMENT_VALUES_FILE \
-  --set ingress.TLSkey=$WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 \
-  --set ingress.TLScert=$WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 \
-  --set ingress.CAcert=$LAB_ONZACK_IO_CA_BASE64 \
+  --set ingress.TLSkey=$INGRESS_KEY_BASE64 \
+  --set ingress.TLScert=$INGRESS_CRT_BASE64 \
+  --set ingress.CAcert=$INGRESS_CA_CRT_BASE64 \
   --set rancher.instanceName=$INSTANCE_NAME \
   --set ingress.domain=$DOMAIN \
   $INSTANCE_NAME /etc/rancher-saas/helm >> /dev/null
-##################################################3 --> API return value
 
 # Check if Helm was successfull
 if (( $? != "0" )); then
   STATUS="error"
   setduration
-  errorlog "Helm did not complete successully, duration $DURATION seconds"
+  errorlog "Helm did not complete successully, duration $DURATION ms"
   returnlog "Helm not successfull"
   exit 1
 else
-  oklog "OK" "Run Helm command was successfull"
+  STATUS="ok"
+  setduration
+  oklog "OK" "Successfully started $INSTANCE_NAME deployment"
+  returnlog "Successfully started $INSTANCE_NAME deployment"
 fi
 
 ## Wait 5 minutes for Rancher go get ready
@@ -164,13 +211,13 @@ TRY="360"
 while (( $TRY > 0 ))
   do
     HEALTH=$(curl -k -s https://$INSTANCE_NAME.$DOMAIN/healthz | head -n 1)
-    # echo "DEBUG - The HEALT environment varialbe is: $HEALTH"
     if [ "$HEALTH" == "ok" ]; then
       oklog "OK" "Rancher $INSTANCE_NAME is up and running"
       # Get Rancher login token
       oklog "INFO" "Get Rancher login token"
       LOGINRESPONSE="undefined"
       LOGINTOKEN="undefined"
+      USERID="undefined"
       LOGINRESPONSE=`curl -s "https://$INSTANCE_NAME.$DOMAIN/v3-public/localProviders/local?action=login" \
         -H 'content-type: application/json' \
         --data-binary '{"username":"admin","password":"admin"}' \
@@ -179,14 +226,17 @@ while (( $TRY > 0 ))
       if (( $? != "0" )); then
         STATUS="error"
         setduration
-        errorlog "Rancher login did not complete successully, duration $DURATION seconds"
-        returnlog "Rancher login not successfull"
+        errorlog "Rancher login did not complete successully, duration $DURATION ms"
+        cleanup
         exit 1
       else
         oklog "OK" "Rancher login was successfull"
       fi
+    
       LOGINTOKEN=`echo $LOGINRESPONSE | jq -r .token`
+      USERID=`echo $LOGINRESPONSE | jq -r .userId`
       #oklog "DEBUG" "Rancher login token: $LOGINTOKEN"
+      #oklog "DEBUG" "Rancher admin userId: $USERID"
       
       # Set Rancher admin password
       oklog "INFO" "Set Rancher admin password"
@@ -199,12 +249,31 @@ while (( $TRY > 0 ))
       if (( $? != "0" )); then
         STATUS="error"
         setduration
-        errorlog "Set Rancher admin password did not complete successully, duration $DURATION seconds"
-        returnlog "Set Rancher password not successfull"
+        errorlog "Set Rancher admin password did not complete successully, duration $DURATION ms"
+        cleanup
         exit 1
       else
         oklog "OK" "Set Rancher admin password was successfull"
-      fi      
+      fi
+
+      # Force Rancher admin to change password on first login
+      oklog "INFO" "Force Rancher admin to change password on first login"
+      curl -X PUT -s "https://$INSTANCE_NAME.$DOMAIN/v3/users/$USERID" \
+        -H 'content-type: application/json' \
+        -H "Authorization: Bearer $LOGINTOKEN" \
+        --data-binary '{"mustChangePassword": true}' \
+        --insecure >> /dev/null
+      # Check if forcing Rancher admin to change password on first login was successfull
+      if (( $? != "0" )); then
+        STATUS="error"
+        setduration
+        errorlog "Force Rancher admin to change password on first login not successfull, duration $DURATION ms"
+        cleanup
+        exit 1
+      else
+        oklog "OK" "Force Rancher admin to change password on first login was successfull"
+      fi
+
       # Set Rancher URL
       oklog "INFO" "Set Rancher URL"
       curl -s "https://$INSTANCE_NAME.$DOMAIN/v3/settings/server-url" \
@@ -217,19 +286,19 @@ while (( $TRY > 0 ))
       if (( $? != "0" )); then
         STATUS="error"
         setduration
-        errorlog "Set Rancher URL did not complete successully, duration $DURATION seconds"
-        returnlog "Set Rancher URL not successfull"
+        errorlog "Set Rancher URL did not complete successully, duration $DURATION ms"
+        cleanup
         exit 1
       else
         oklog "OK" "Set Rancher URL was successfull"
       fi
       STATUS="ok"
       setduration
-      oklog "OK" "Deployed Rancher $INSTANCE_NAME successfully, duration $DURATION seconds"
-      returnlog "Deployed Rancher $INSTANCE_NAME successfully"
+      oklog "OK" "Deployed Rancher $INSTANCE_NAME successfully, duration $DURATION ms"
+      cleanup
       exit 0
     else
-      oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet... $TRY seconds remaining until timeout"
+      oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet, timeout in $TRY seconds"
       sleep 5
       TRY=$(($TRY - 5))
     fi
@@ -237,6 +306,6 @@ done
 
 STATUS="error"
 setduration
-errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION seconds"
-returnlog "Timeout while waiting for Rancher $INSTANCE_NAME"
+errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION ms"
+cleanup
 exit 1

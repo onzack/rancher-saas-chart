@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 LABEL maintainer="ONZACK AG"
-RUN groupadd -g 10000 zack && useradd -u 10000 -g 10000 -s /bin/bash -m zack
+RUN groupadd -g 10000 zack && zack -u 10000 -g 10000 -s /bin/bash -m zack
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends tzdata curl ca-certificates webhook jq gnupg gnupg2 gnupg1 apt-transport-https bc && \

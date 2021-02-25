@@ -4,9 +4,9 @@ STARTTIME=$(date +%s.%N)
 
 ## Expected environment variables
 # ENVIRONMENT_VALUES_FILE
-# WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64
-# WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64
-# LAB_ONZACK_IO_CA_BASE64
+# INGRESS_KEY_BASE64
+# INGRESS_CRT_BASE64
+# INGRESS_CA_CRT_BASE64
 # DOMAIN
 
 ## Expected arguments
@@ -80,22 +80,22 @@ if [[ ! -v ENVIRONMENT_VALUES_FILE ]]
     errorlog "Environment variable ENVIRONMENT_VALUES_FILE not set"
 fi
 
-if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 ]]
+if [[ ! -v INGRESS_KEY_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 not set"
+    errorlog "Environment variable INGRESS_KEY_BASE64 not set"
 fi
 
-if [[ ! -v WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 ]]
+if [[ ! -v INGRESS_CRT_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 not set"
+    errorlog "Environment variable INGRESS_CRT_BASE64 not set"
 fi
 
-if [[ ! -v LAB_ONZACK_IO_CA_BASE64 ]]
+if [[ ! -v INGRESS_CA_CRT_BASE64 ]]
   then
     STATUS="error"
-    errorlog "Environment variable LAB_ONZACK_IO_CA_BASE64 not set"
+    errorlog "Environment variable INGRESS_CA_CRT_BASE64 not set"
 fi
 
 if [[ ! -v DOMAIN ]]
@@ -129,14 +129,14 @@ if [ "$STATUS" == "error" ]; then
 fi
 
 ## The actual script
-# Deploy Rancher SaaS with Helm
-oklog "INFO" "All Checks are OK, run Helm command"
+# Update Rancher SaaS with Helm
+oklog "INFO" "All Checks are OK, run Helm upgrade"
 helm upgrade --install --create-namespace -n $INSTANCE_NAME \
   -f /etc/rancher-saas/helm/size-$SIZE.yaml \
   -f $ENVIRONMENT_VALUES_FILE \
-  --set ingress.TLSkey=$WILDCARD_APPS_LAB_ONZACK_IO_KEY_BASE64 \
-  --set ingress.TLScert=$WILDCARD_APPS_LAB_ONZACK_IO_CRT_BASE64 \
-  --set ingress.CAcert=$LAB_ONZACK_IO_CA_BASE64 \
+  --set ingress.TLSkey=$INGRESS_KEY_BASE64 \
+  --set ingress.TLScert=$INGRESS_CRT_BASE64 \
+  --set ingress.CAcert=$INGRESS_CA_CRT_BASE64 \
   --set rancher.instanceName=$INSTANCE_NAME \
   --set ingress.domain=$DOMAIN \
   $INSTANCE_NAME /etc/rancher-saas/helm >> /dev/null
@@ -149,7 +149,10 @@ if (( $? != "0" )); then
   returnlog "Helm not successfull"
   exit 1
 else
-  oklog "OK" "Run Helm command was successfull"
+  STATUS="updating"
+  setduration
+  oklog "OK" "Successfully started $INSTANCE_NAME update"
+  returnlog "Successfully started $INSTANCE_NAME update"
 fi
 
 ## Wait 5 minutes for Rancher go get ready
