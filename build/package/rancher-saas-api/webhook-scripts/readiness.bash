@@ -1,5 +1,5 @@
 #!/bin/bash
 
-echo "Readiness proble successful."
+echo "ok"
 
 exit 0

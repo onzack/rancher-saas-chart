@@ -27,7 +27,7 @@ if [ -f $RANCHER_SAAS_API_HELM_TARGET_PATH/helm ]
     echo "WARNING - Helm Chart already existed in build folder and was deleted by this script to avoid conflicts"
     rm -r $RANCHER_SAAS_API_HELM_TARGET_PATH/helm
 fi
-cp -rp ./deployment/kubernetes/helm $RANCHER_SAAS_API_HELM_TARGET_PATH
+cp -rp ./deployments/kubernetes/helm $RANCHER_SAAS_API_HELM_TARGET_PATH
 
 # Docker Build
 echo "INFO - Start docker build for rkm-outpost:$DOCKER_TAG"

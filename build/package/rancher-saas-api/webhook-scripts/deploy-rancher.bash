@@ -24,13 +24,13 @@ readonly ADMIN_PW="$3"
 readonly JOB_ID="$4"
 
 ## Define varialbes for log output
-if [ -f /var/run/secrets/kubernetes.io/serviceaccount/ca.crt ]
+if [ "$LOCAL" == "true" ]
   then
-    OKLOGTARGET="/proc/1/fd/1"
-    ERRORLOGTARGET="/proc/1/fd/2"
-  else
     OKLOGTARGET="/dev/stdout"
     ERRORLOGTARGET="/dev/stderr"
+  else
+    OKLOGTARGET="/proc/1/fd/1"
+    ERRORLOGTARGET="/proc/1/f
 fi
 
 ## Define global variable

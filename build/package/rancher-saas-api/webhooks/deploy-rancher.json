@@ -27,7 +27,7 @@
       "match":
       {
         "type": "value",
-        "value": "<YOUR-GENERATED-TOKEN>",
+        "value": "{{ getenv "TOKEN" | js }}",
         "parameter":
         {
           "source": "payload",
