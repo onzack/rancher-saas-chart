@@ -30,7 +30,7 @@ if [ "$LOCAL" == "true" ]
     ERRORLOGTARGET="/dev/stderr"
   else
     OKLOGTARGET="/proc/1/fd/1"
-    ERRORLOGTARGET="/proc/1/f
+    ERRORLOGTARGET="/proc/1/fd/2"
 fi
 
 ## Define global variable
@@ -45,9 +45,9 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - ERROR - $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: 0 - ERROR - Stage: deploy - $MESSAGE" > $ERRORLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - ERROR - $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: $JOB_ID - ERROR - Stage: deploy - $MESSAGE" > $ERRORLOGTARGET
   fi
 }
 
@@ -55,9 +55,9 @@ oklog () {
   local TYPE="$1"
   local MESSAGE="$2"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - $TYPE - $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: 0 - $TYPE - Stage: deploy - $MESSAGE" > $OKLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - $TYPE - $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: $JOB_ID - $TYPE - Stage: deploy - $MESSAGE" > $OKLOGTARGET
   fi
 }
 
@@ -70,12 +70,6 @@ returnlog () {
   else
     echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
   fi
-}
-
-cleanup () {
-  unset LOGINRESPONSE
-  unset LOGINTOKEN
-  unset USERID
 }
 
 ## Check for needed files
@@ -136,7 +130,7 @@ if [ "$#" -ne 4 ]; then
 fi
 
 ## Check kube-api connection
-kubectl get endpoints -n default kubernetes >> /dev/null
+kubectl get namespaces >> /dev/null
 if (( $? != "0" ))
   then
     STATUS="error"
@@ -204,108 +198,10 @@ else
   returnlog "Successfully started $INSTANCE_NAME deployment"
 fi
 
-## Wait 5 minutes for Rancher go get ready
-oklog "INFO" "Start waiting for Rancher $INSTANCE_NAME go get ready"
-HEALTH="notok"
-TRY="360"
-while (( $TRY > 0 ))
-  do
-    HEALTH=$(curl -k -s https://$INSTANCE_NAME.$DOMAIN/healthz | head -n 1)
-    if [ "$HEALTH" == "ok" ]; then
-      oklog "OK" "Rancher $INSTANCE_NAME is up and running"
-      # Get Rancher login token
-      oklog "INFO" "Get Rancher login token"
-      LOGINRESPONSE="undefined"
-      LOGINTOKEN="undefined"
-      USERID="undefined"
-      LOGINRESPONSE=`curl -s "https://$INSTANCE_NAME.$DOMAIN/v3-public/localProviders/local?action=login" \
-        -H 'content-type: application/json' \
-        --data-binary '{"username":"admin","password":"admin"}' \
-        --insecure`
-      # Check if Rancher login was successfull
-      if (( $? != "0" )); then
-        STATUS="error"
-        setduration
-        errorlog "Rancher login did not complete successully, duration $DURATION ms"
-        cleanup
-        exit 1
-      else
-        oklog "OK" "Rancher login was successfull"
-      fi
-    
-      LOGINTOKEN=`echo $LOGINRESPONSE | jq -r .token`
-      USERID=`echo $LOGINRESPONSE | jq -r .userId`
-      #oklog "DEBUG" "Rancher login token: $LOGINTOKEN"
-      #oklog "DEBUG" "Rancher admin userId: $USERID"
-      
-      # Set Rancher admin password
-      oklog "INFO" "Set Rancher admin password"
-      curl -s "https://$INSTANCE_NAME.$DOMAIN/v3/users?action=changepassword" \
-        -H 'content-type: application/json' \
-        -H "Authorization: Bearer $LOGINTOKEN" \
-        --data-binary '{"currentPassword":"admin","newPassword":"'$ADMIN_PW'"}' \
-        --insecure
-      # Check if Rancher admin passwort setting was successfull
-      if (( $? != "0" )); then
-        STATUS="error"
-        setduration
-        errorlog "Set Rancher admin password did not complete successully, duration $DURATION ms"
-        cleanup
-        exit 1
-      else
-        oklog "OK" "Set Rancher admin password was successfull"
-      fi
+# Start the script for the initial rancher configuration and send it to the background
+tmux new -d /opt/webhook-scripts/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
-      # Force Rancher admin to change password on first login
-      oklog "INFO" "Force Rancher admin to change password on first login"
-      curl -X PUT -s "https://$INSTANCE_NAME.$DOMAIN/v3/users/$USERID" \
-        -H 'content-type: application/json' \
-        -H "Authorization: Bearer $LOGINTOKEN" \
-        --data-binary '{"mustChangePassword": true}' \
-        --insecure >> /dev/null
-      # Check if forcing Rancher admin to change password on first login was successfull
-      if (( $? != "0" )); then
-        STATUS="error"
-        setduration
-        errorlog "Force Rancher admin to change password on first login not successfull, duration $DURATION ms"
-        cleanup
-        exit 1
-      else
-        oklog "OK" "Force Rancher admin to change password on first login was successfull"
-      fi
-
-      # Set Rancher URL
-      oklog "INFO" "Set Rancher URL"
-      curl -s "https://$INSTANCE_NAME.$DOMAIN/v3/settings/server-url" \
-        -H 'content-type: application/json' \
-        -H "Authorization: Bearer $LOGINTOKEN" \
-        -X PUT \
-        --data-binary '{"name":"server-url","value":"'$INSTANCE_NAME.$DOMAIN'"}' \
-        --insecure >> /dev/null
-      # Check if Rancher URL setting was successfull
-      if (( $? != "0" )); then
-        STATUS="error"
-        setduration
-        errorlog "Set Rancher URL did not complete successully, duration $DURATION ms"
-        cleanup
-        exit 1
-      else
-        oklog "OK" "Set Rancher URL was successfull"
-      fi
-      STATUS="ok"
-      setduration
-      oklog "OK" "Deployed Rancher $INSTANCE_NAME successfully, duration $DURATION ms"
-      cleanup
-      exit 0
-    else
-      oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet, timeout in $TRY seconds"
-      sleep 5
-      TRY=$(($TRY - 5))
-    fi
-done
-
-STATUS="error"
+STATUS="ok"
 setduration
-errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION ms"
-cleanup
-exit 1
+oklog "OK" "Started initial rancher configuration script after $DURATION ms"
+exit 0

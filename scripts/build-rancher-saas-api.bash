@@ -4,7 +4,7 @@
 # This script expects an arguemnt for the rkm-outpost docker tag
 
 DOCKER_TAG=""
-RANCHER_SAAS_API_HELM_TARGET_PATH="./build/package/rancher-saas-api/"
+RANCHER_SAAS_API_HELM_TARGET_PATH="./build/package/rancher-saas-api/helm"
 
 # Check arguments
 if [ "$#" -lt 1 ] 
@@ -22,12 +22,12 @@ echo "INFO - Docker Tag is: $DOCKER_TAG"
 
 # Copy Helm chart to build folder
 echo "INFO - Start go build for rkm-outpost"
-if [ -f $RANCHER_SAAS_API_HELM_TARGET_PATH/helm ]
+if [ -f $RANCHER_SAAS_API_HELM_TARGET_PATH ]
   then
     echo "WARNING - Helm Chart already existed in build folder and was deleted by this script to avoid conflicts"
-    rm -r $RANCHER_SAAS_API_HELM_TARGET_PATH/helm
+    rm -r $RANCHER_SAAS_API_HELM_TARGET_PATH
 fi
-cp -rp ./deployments/kubernetes/helm $RANCHER_SAAS_API_HELM_TARGET_PATH
+cp -rp ./deployments/kubernetes/helm/rancher-saas $RANCHER_SAAS_API_HELM_TARGET_PATH
 
 # Docker Build
 echo "INFO - Start docker build for rkm-outpost:$DOCKER_TAG"
@@ -42,5 +42,5 @@ fi
 
 # Cleanup
 echo "INFO - Start cleanup"
-rm -r $RANCHER_SAAS_API_HELM_TARGET_PATH/helm
+rm -r $RANCHER_SAAS_API_HELM_TARGET_PATH
 echo "INFO - Finisched cleanup"

@@ -1,0 +1,2 @@
+The Rancher SaaS API was successbully deployed.
+Access it via: "https://{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"
