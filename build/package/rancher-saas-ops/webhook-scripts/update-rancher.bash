@@ -150,7 +150,7 @@ if (( $? != "0" )); then
   STATUS="error"
   setduration
   errorlog "Helm did not complete successully, duration $DURATION ms"
-  returnlog "Helm not successfull"
+  returnlog "Helm not successful"
   exit 0
 else
   STATUS="updating"

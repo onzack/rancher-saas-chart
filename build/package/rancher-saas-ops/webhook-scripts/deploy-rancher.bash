@@ -167,7 +167,7 @@ if (( $? != "0" )); then
   STATUS="error"
   setduration
   errorlog "Create namespace $INSTANCE_NAME not successully, duration $DURATION ms"
-  returnlog "Create namespace $INSTANCE_NAME not successfull"
+  returnlog "Create namespace $INSTANCE_NAME not successful"
   exit 0
 else
   STATUS="deploying"
@@ -188,12 +188,12 @@ helm upgrade --install -n $INSTANCE_NAME \
   --set ingress.domain=$DOMAIN \
   $INSTANCE_NAME /etc/rancher-saas/helm >> /dev/null
 
-# Check if Helm was successfull
+# Check if Helm was successful
 if (( $? != "0" )); then
   STATUS="error"
   setduration
   errorlog "Helm did not complete successully, duration $DURATION ms"
-  returnlog "Helm not successfull"
+  returnlog "Helm not successful"
   exit 0
 else
   STATUS="ok"
