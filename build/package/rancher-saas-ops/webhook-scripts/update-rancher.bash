@@ -115,7 +115,7 @@ if [ "$#" -ne 3 ]; then
 fi
 
 ## Check kube-api connection
-kubectl get endpoints -n default kubernetes >> /dev/null
+kubectl get namespaces >> /dev/null
 if (( $? != "0" ))
   then
     STATUS="error"
@@ -126,7 +126,7 @@ fi
 if [ "$STATUS" == "error" ]; then
   STATUS="error"
   setduration
-  errorlog "Something with the configuration is wrong, duration $DURATION seconds"
+  errorlog "Something with the configuration is wrong, duration $DURATION ms"
   returnlog "Configuration not correct"
   exit 0
 fi
