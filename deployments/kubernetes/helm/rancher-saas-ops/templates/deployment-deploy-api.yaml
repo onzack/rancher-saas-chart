@@ -7,7 +7,7 @@ metadata:
     role: deploy-api
   name: deploy-api
 spec:
-  replicas: {{ .Values.rancherSaaSAPI.replicas }}
+  replicas: {{ .Values.deployAPI.replicas }}
   selector:
     matchLabels:
       app: rancher-saas-ops
@@ -39,7 +39,7 @@ spec:
         fsGroup: 10000
       containers:
       - name: deploy-api
-        image: "{{ .Values.rancherSaaSAPI.repository }}:{{ .Values.rancherSaaSAPI.tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         args: ["-hooks=/etc/webhooks/readiness.json","-hooks=/etc/webhooks/deploy-rancher.json","-template"]
         imagePullPolicy: IfNotPresent
         securityContext:
@@ -54,7 +54,7 @@ spec:
           - name: TZ
             value: {{ .Values.timezone }}
           - name: TOKEN
-            value: {{ .Values.rancherSaaSAPI.token }}
+            value: {{ .Values.token }}
           - name: DOMAIN
             value: {{ .Values.ingress.domain }}
           - name: INGRESS_KEY_BASE64
@@ -64,18 +64,18 @@ spec:
           - name: INGRESS_CA_CRT_BASE64
             value: {{ .Values.ingress.CAcert }}
           - name: RANCHER_CLUSTER_ID
-            value: {{ .Values.rancherSaaSAPI.rancherClusterID }}
+            value: {{ .Values.rancherClusterID }}
           - name: RANCHER_PROJECT_ID
-            value: {{ .Values.rancherSaaSAPI.rancherProjectID }}
+            value: {{ .Values.rancherProjectID }}
           - name: ENVIRONMENT_VALUES_FILE
-            value: {{ .Values.rancherSaaSAPI.environmentValuesFile }}
+            value: {{ .Values.environmentValuesFile }}
         resources:
           requests:
-            memory: {{ .Values.rancherSaaSAPI.requests.memory | quote }}
-            cpu: {{ .Values.rancherSaaSAPI.requests.cpu | quote }}
+            memory: {{ .Values.deployAPI.requests.memory | quote }}
+            cpu: {{ .Values.deployAPI.requests.cpu | quote }}
           limits:
-            memory: {{ .Values.rancherSaaSAPI.limits.memory | quote }}
-            cpu: {{ .Values.rancherSaaSAPI.limits.cpu | quote }}
+            memory: {{ .Values.deployAPI.limits.memory | quote }}
+            cpu: {{ .Values.deployAPI.limits.cpu | quote }}
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 5
@@ -95,7 +95,7 @@ spec:
             port: 9000
         volumeMounts:
           - name: environment-values
-            mountPath: {{ .Values.rancherSaaSAPI.environmentValuesFile }}
+            mountPath: {{ .Values.environmentValuesFile }}
             subPath: environment.yaml
       volumes:
         - name: environment-values
@@ -103,4 +103,4 @@ spec:
             name: environment-values
       serviceAccountName: rancher-saas-ops
       imagePullSecrets:
-        - name: {{ .Values.rancherSaaSAPI.imagePullSecret }}
+        - name: {{ .Values.image.imagePullSecret }}

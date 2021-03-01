@@ -3,13 +3,14 @@
 # Declare variables to be passed into your templates.
 
 timezone: "Europe/Zurich"
-
 namespace: rancher-saas-ops
 
-rancherSaaSAPI:
+image:
   repository: harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-ops
-  tag: v0.1.18
+  tag: v0.1.19
   imagePullSecret: REDACTED
+
+deployAPI:
   replicas: 3
   requests:
     memory: 100Mi
@@ -17,11 +18,20 @@ rancherSaaSAPI:
   limits:
     memory: 1Gi
     cpu: 500m
-  token: REDACTED
-  rancherClusterID: REDACTED
-  rancherProjectID: REDACTED
-  environmentValuesFile: /etc/rancher-saas/environment.yaml
 
+updateAPI:
+  replicas: 3
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+  
+token: REDACTED
+rancherClusterID: REDACTED
+rancherProjectID: REDACTED  
+environmentValuesFile: /etc/rancher-saas/environment.yaml
 
 ingress:
   letsEncrypt:
@@ -32,6 +42,6 @@ ingress:
   domain: example.com
   # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
   TLSsecretName: custom-ingress-tls
-  TLSkey: REDACTED
-  TLScert: REDACTED
-  CAcert: REDACTED
+  # TLSkey: REDACTED
+  # TLScert: REDACTED
+  # CAcert: REDACTED
