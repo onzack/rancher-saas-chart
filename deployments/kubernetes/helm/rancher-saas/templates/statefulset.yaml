@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: rancher
+  annotations:
+    rancher.onzack.io/size: {{ .Values.rancher.size }}
 spec:
   selector:
     matchLabels:

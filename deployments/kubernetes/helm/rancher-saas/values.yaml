@@ -8,6 +8,7 @@ rancher:
   instanceName: "rancher-saas-dev"
   repository: rancher/rancher
   tag: v2.4.14
+  size: S
   twoPointFive: false
   ## The following values are defined in the size-[S|M|L].yaml files
   # requests:

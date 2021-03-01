@@ -137,6 +137,7 @@ oklog "INFO" "All Checks are OK, run Helm upgrade"
 helm upgrade --install --create-namespace -n $INSTANCE_NAME \
   -f /etc/rancher-saas/helm/size-$SIZE.yaml \
   -f $ENVIRONMENT_VALUES_FILE \
+  --set rancher.size=$SIZE \
   --set ingress.TLSkey=$INGRESS_KEY_BASE64 \
   --set ingress.TLScert=$INGRESS_CRT_BASE64 \
   --set ingress.CAcert=$INGRESS_CA_CRT_BASE64 \
