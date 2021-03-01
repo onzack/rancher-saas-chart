@@ -134,7 +134,7 @@ fi
 ## The actual script
 # Update Rancher SaaS with Helm
 oklog "INFO" "All Checks are OK, run Helm upgrade"
-helm upgrade --install --create-namespace -n $INSTANCE_NAME \
+helm upgrade -n $INSTANCE_NAME \
   -f /etc/rancher-saas/helm/size-$SIZE.yaml \
   -f $ENVIRONMENT_VALUES_FILE \
   --set rancher.size=$SIZE \
