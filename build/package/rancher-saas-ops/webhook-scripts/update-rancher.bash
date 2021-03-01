@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STARTTIME=$(date +%s.%N)
+STARTTIME=$(date +%s%3N)
 
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
