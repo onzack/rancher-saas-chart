@@ -37,8 +37,8 @@ STATUS="undefined"
 
 ## Define functions
 setduration () {
-  local ENDTIME=$(date +%s.%N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
+  local ENDTIME=$(date +%s%3N)
+  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
 }
 
 errorlog () {

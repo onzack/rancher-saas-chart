@@ -9,12 +9,12 @@
 ## Expected arguments
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
 # $2: Job ID, integer
-# $3 starttime, integer
+# $3 initial starttime, integer
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
 readonly JOB_ID="$2"
-readonly STARTTIME="$3"
+readonly INITIALSTARTTIME="$3"
 
 ## Define varialbes for log output
 if [ "$LOCAL" == "true" ]
@@ -32,7 +32,7 @@ STATUS="undefined"
 ## Define functions
 setduration () {
   local ENDTIME=$(date +%s%3N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
+  DURATION=$(echo "$ENDTIME - $INITIALSTARTTIME" | bc -l)
 }
 
 errorlog () {
@@ -62,10 +62,10 @@ if [[ ! -v DOMAIN ]]
 fi
 
 ## Check needed arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
   STATUS="error"
-  errorlog "Not the correct amount of arguments passed, expected 2"
-  errorlog "Pass the following arguments: instance-name, job-id"
+  errorlog "Not the correct amount of arguments passed, expected 3"
+  errorlog "Pass the following arguments: instance-name, job-id, initial starttime"
 fi
 
 ## Check status before proceede wiht actual script

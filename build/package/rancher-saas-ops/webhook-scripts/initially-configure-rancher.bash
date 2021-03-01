@@ -7,13 +7,13 @@
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
 # $2: Rancher SaaS admin password
 # $3: Job ID, integer
-# $4: starttime, integer
+# $4: initial starttime, integer
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
 readonly ADMIN_PW="$2"
 readonly JOB_ID="$3"
-readonly STARTTIME="$4"
+readonly INITIALSTARTTIME="$4"
 
 ## Define varialbes for log output
 if [ "$LOCAL" == "true" ]
@@ -31,7 +31,7 @@ STATUS="undefined"
 ## Define functions
 setduration () {
   local ENDTIME=$(date +%s%3N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
+  DURATION=$(echo "$ENDTIME - $INITIALSTARTTIME" | bc -l)
 }
 
 errorlog () {
@@ -69,7 +69,7 @@ fi
 if [ "$#" -ne 4 ]; then
   STATUS="error"
   errorlog "Not the correct amount of arguments passed, expected 4"
-  errorlog "Pass the following arguments: instance-name, password, job-id, starttime"
+  errorlog "Pass the following arguments: instance-name, password, job-id, initial starttime"
 fi
 
 ## Check status before proceede wiht actual script
@@ -84,7 +84,7 @@ fi
 ## The actual script
 # Start the health check script
 oklog "INFO" "Start health check script"
-/opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
+/opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $INITIALSTARTTIME
 # Check if health check script was successfull
 if (( $? != "0" )); then
   STATUS="error"
