@@ -149,7 +149,7 @@ helm upgrade --install --create-namespace -n $INSTANCE_NAME \
 if (( $? != "0" )); then
   STATUS="error"
   setduration
-  errorlog "Helm did not complete successully, duration $DURATION seconds"
+  errorlog "Helm did not complete successully, duration $DURATION ms"
   returnlog "Helm not successfull"
   exit 0
 else

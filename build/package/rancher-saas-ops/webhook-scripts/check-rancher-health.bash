@@ -77,7 +77,7 @@ fi
 if [ "$STATUS" == "error" ]; then
   STATUS="error"
   setduration
-  errorlog "Something with the configuration is wrong, duration $DURATION seconds"
+  errorlog "Something with the configuration is wrong, duration $DURATION ms"
   returnlog "Configuration not correct"
   exit 0
 fi
@@ -105,6 +105,6 @@ done
 
 STATUS="error"
 setduration
-errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION seconds"
+errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION ms"
 returnlog "Timeout while waiting for Rancher $INSTANCE_NAME"
 exit 0
