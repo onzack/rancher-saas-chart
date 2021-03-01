@@ -4,7 +4,7 @@
 # This script expects an arguemnt for the rkm-outpost docker tag
 
 DOCKER_TAG=""
-RANCHER_SAAS_API_HELM_TARGET_PATH="./build/package/rancher-saas-api/helm"
+RANCHER_SAAS_API_HELM_TARGET_PATH="./build/package/rancher-saas-ops/helm"
 
 # Check arguments
 if [ "$#" -lt 1 ] 
@@ -31,13 +31,13 @@ cp -rp ./deployments/kubernetes/helm/rancher-saas $RANCHER_SAAS_API_HELM_TARGET_
 
 # Docker Build
 echo "INFO - Start docker build for rkm-outpost:$DOCKER_TAG"
-docker build -t harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-api:$DOCKER_TAG ./build/package/rancher-saas-api
+docker build -t harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-ops:$DOCKER_TAG ./build/package/rancher-saas-ops
 if (( $? != "0" ))
   then
     echo "ERROR - Something went wrong with docker build"
     exit 1
   else
-    echo "INFO - Finisched docker build for rancher-saas-api:$DOCKER_TAG"
+    echo "INFO - Finisched docker build for rancher-saas-ops:$DOCKER_TAG"
 fi
 
 # Cleanup

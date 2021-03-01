@@ -1,28 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: rancher
+  name: deploy-api
   {{- if .Values.ingress.letsEncrypt.enabled }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   {{- end }}
 spec:
   rules:
-  - host: "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
+  - host: "{{ .Values.ingress.deployAPIHost }}.{{ .Values.ingress.domain }}"
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: rancher
+            name: deploy-api
             port:
-              number: 80
+              number: 9000
   tls:
     - hosts:
-      - "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
+      - "{{ .Values.ingress.deployAPIHost }}.{{ .Values.ingress.domain }}"
       {{- if .Values.ingress.letsEncrypt.enabled }}
-      secretName: letsencrypt-ingress-tls
+      secretName: deploy-api-tls-letsencrypt
       {{- else }}
       secretName: {{ .Values.ingress.TLSsecretName }}
       {{- end }}

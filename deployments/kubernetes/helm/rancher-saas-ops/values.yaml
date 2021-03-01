@@ -4,11 +4,11 @@
 
 timezone: "Europe/Zurich"
 
-namespace: rancher-saas-api
+namespace: rancher-saas-ops
 
 rancherSaaSAPI:
-  repository: harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-api
-  tag: v0.1.10
+  repository: harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-ops
+  tag: v0.1.18
   imagePullSecret: REDACTED
   replicas: 3
   requests:
@@ -27,7 +27,8 @@ ingress:
   letsEncrypt:
     enabled: false
   # Domain for ingress host, added to instanceName
-  host: rancher-saas-api
+  deployAPIHost: deploy-api
+  updateAPIHost: update-api
   domain: example.com
   # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
   TLSsecretName: custom-ingress-tls

@@ -1,10 +1,12 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rancher-saas-api
+  name: deploy-api
 spec:
   selector:
-    app: rancher-saas-api
+    app: rancher-saas-ops
+    role: deploy-api
   ports:
   - name: hattp
     protocol: TCP

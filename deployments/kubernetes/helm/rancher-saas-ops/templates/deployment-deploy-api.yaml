@@ -3,13 +3,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: rancher-saas-api
-  name: rancher-saas-api
+    app: rancher-saas-ops
+    role: deploy-api
+  name: deploy-api
 spec:
   replicas: {{ .Values.rancherSaaSAPI.replicas }}
   selector:
     matchLabels:
-      app: rancher-saas-api
+      app: rancher-saas-ops
+      role: deploy-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -18,30 +20,31 @@ spec:
   template:
     metadata:
       labels:
-        app: rancher-saas-api
+        app: rancher-saas-ops
+        role: deploy-api
     spec:
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
-              - key: app
+              - key: role
                 operator: In
                 values:
-                - rancher-saas-api
+                - deploy-api
             topologyKey: "kubernetes.io/hostname"
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
         fsGroup: 10000
       containers:
-      - name: rancher-saas-api
+      - name: deploy-api
         image: "{{ .Values.rancherSaaSAPI.repository }}:{{ .Values.rancherSaaSAPI.tag }}"
         args: ["-hooks=/etc/webhooks/readiness.json","-hooks=/etc/webhooks/deploy-rancher.json","-template"]
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
               - ALL
@@ -98,6 +101,6 @@ spec:
         - name: environment-values
           configMap:
             name: environment-values
-      serviceAccountName: rancher-saas-api
+      serviceAccountName: rancher-saas-ops
       imagePullSecrets:
         - name: {{ .Values.rancherSaaSAPI.imagePullSecret }}
