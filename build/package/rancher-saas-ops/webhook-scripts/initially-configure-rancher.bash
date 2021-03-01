@@ -179,6 +179,6 @@ else
 fi
 STATUS="ok"
 setduration
-oklog "OK" "Deployed Rancher $INSTANCE_NAME successfully, duration $DURATION ms"
+oklog "OK" "Finished Rancher $INSTANCE_NAME deployment successfully, duration $DURATION ms"
 cleanup
 exit 0

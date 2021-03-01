@@ -94,8 +94,7 @@ while (( $TRY > 0 ))
     if [ "$HEALTH" == "ok" ]; then
       STATUS="ok"
       setduration
-      oklog "OK" "Updated Rancher $INSTANCE_NAME successfully, duration $DURATION seconds"
-      returnlog "Updated Rancher $INSTANCE_NAME successfully"
+      oklog "OK" "Rancher $INSTANCE_NAME up, running and healthy after $DURATION ms"
       exit 0
     else
       oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet... $TRY seconds remaining until timeout"
