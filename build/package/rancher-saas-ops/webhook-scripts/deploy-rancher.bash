@@ -2,6 +2,9 @@
 
 STARTTIME=$(date +%s%3N)
 
+## Comments
+# We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
+
 ## Expected environment variables
 # ENVIRONMENT_VALUES_FILE
 # INGRESS_KEY_BASE64
@@ -143,7 +146,7 @@ if [ "$STATUS" == "error" ]; then
   setduration
   errorlog "Something with the configuration is wrong, duration $DURATION ms"
   returnlog "Configuration not correct"
-  exit 1
+  exit 0
 fi
 
 ## The actual script
@@ -157,7 +160,7 @@ metadata:
     field.cattle.io/projectId: $RANCHER_CLUSTER_ID:$RANCHER_PROJECT_ID
   labels:
     field.cattle.io/projectId: $RANCHER_PROJECT_ID
-    name: rancher-saas-dev
+    name: $INSTANCE_NAME
   name: $INSTANCE_NAME
 EOF
 if (( $? != "0" )); then
@@ -165,7 +168,7 @@ if (( $? != "0" )); then
   setduration
   errorlog "Create namespace $INSTANCE_NAME not successully, duration $DURATION ms"
   returnlog "Create namespace $INSTANCE_NAME not successfull"
-  exit 1
+  exit 0
 else
   STATUS="deploying"
   setduration
@@ -190,7 +193,7 @@ if (( $? != "0" )); then
   setduration
   errorlog "Helm did not complete successully, duration $DURATION ms"
   returnlog "Helm not successfull"
-  exit 1
+  exit 0
 else
   STATUS="ok"
   setduration

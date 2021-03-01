@@ -2,6 +2,9 @@
 
 STARTTIME=$(date +%s.%N)
 
+## Comments
+# We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
+
 ## Expected environment variables
 # ENVIRONMENT_VALUES_FILE
 # INGRESS_KEY_BASE64
@@ -41,9 +44,9 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "ERROR - Job-ID: 0, $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: 0 - ERROR - Stage: update - $MESSAGE" > $ERRORLOGTARGET
   else
-    echo "ERROR - Job-ID: $JOB_ID, $MESSAGE" > $ERRORLOGTARGET
+    echo "Job-ID: $JOB_ID - ERROR - Stage: update - $MESSAGE" > $ERRORLOGTARGET
   fi
 }
 
@@ -51,9 +54,9 @@ oklog () {
   local TYPE="$1"
   local MESSAGE="$2"
   if [ -z "$JOB_ID" ]; then
-    echo "$TYPE - Job-ID: 0, $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: 0 - $TYPE - Stage: update - $MESSAGE" > $OKLOGTARGET
   else
-    echo "$TYPE - Job-ID: $JOB_ID, $MESSAGE" > $OKLOGTARGET
+    echo "Job-ID: $JOB_ID - $TYPE - Stage: update - $MESSAGE" > $OKLOGTARGET
   fi
 }
 
@@ -125,7 +128,7 @@ if [ "$STATUS" == "error" ]; then
   setduration
   errorlog "Something with the configuration is wrong, duration $DURATION seconds"
   returnlog "Configuration not correct"
-  exit 1
+  exit 0
 fi
 
 ## The actual script
@@ -147,7 +150,7 @@ if (( $? != "0" )); then
   setduration
   errorlog "Helm did not complete successully, duration $DURATION seconds"
   returnlog "Helm not successfull"
-  exit 1
+  exit 0
 else
   STATUS="updating"
   setduration
@@ -155,29 +158,10 @@ else
   returnlog "Successfully started $INSTANCE_NAME update"
 fi
 
-## Wait 5 minutes for Rancher go get ready
-oklog "INFO" "Start waiting for Rancher $INSTANCE_NAME go get ready"
-HEALTH="notok"
-TRY="360"
-while (( $TRY > 0 ))
-  do
-    HEALTH=$(curl -k -s https://$INSTANCE_NAME.$DOMAIN/healthz | head -n 1)
-    # echo "DEBUG - The HEALT environment varialbe is: $HEALTH"
-    if [ "$HEALTH" == "ok" ]; then
-      STATUS="ok"
-      setduration
-      oklog "OK" "Updated Rancher $INSTANCE_NAME successfully, duration $DURATION seconds"
-      returnlog "Updated Rancher $INSTANCE_NAME successfully"
-      exit 0
-    else
-      oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet... $TRY seconds remaining until timeout"
-      sleep 5
-      TRY=$(($TRY - 5))
-    fi
-done
+# Start the script for the initial rancher configuration and send it to the background
+tmux new -d /opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID
 
-STATUS="error"
+STATUS="ok"
 setduration
-errorlog "Time out while waiting for Rancher $INSTANCE_NAME, duration $DURATION seconds"
-returnlog "Timeout while waiting for Rancher $INSTANCE_NAME"
-exit 1
+oklog "OK" "Started health check script after $DURATION ms"
+exit 0
