@@ -160,7 +160,7 @@ else
 fi
 
 # Start the script for the initial rancher configuration and send it to the background
-tmux new -d /opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID
+tmux new -d /opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
 
 STATUS="ok"
 setduration

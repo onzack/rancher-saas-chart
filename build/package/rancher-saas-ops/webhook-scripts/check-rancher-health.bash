@@ -1,25 +1,20 @@
 #!/bin/bash
 
-STARTTIME=$(date +%s.%N)
-
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
 
 ## Expected environment variables
-# ENVIRONMENT_VALUES_FILE
-# INGRESS_KEY_BASE64
-# INGRESS_CRT_BASE64
-# INGRESS_CA_CRT_BASE64
 # DOMAIN
 
 ## Expected arguments
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Rancher SaaS size, like: S, M, or L
-# $3: Job ID, integer
+# $2: Job ID, integer
+# $3 starttime, integer
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
 readonly JOB_ID="$2"
+readonly STARTTIME="$3"
 
 ## Define varialbes for log output
 if [ "$LOCAL" == "true" ]
@@ -36,8 +31,8 @@ STATUS="undefined"
 
 ## Define functions
 setduration () {
-  local ENDTIME=$(date +%s.%N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l | sed -e 's/^\./0./')
+  local ENDTIME=$(date +%s%3N)
+  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
 }
 
 errorlog () {

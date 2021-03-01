@@ -1,7 +1,5 @@
 #!/bin/bash
 
-STARTTIME=$(date +%s%3N)
-
 ## Expected environment variables
 # DOMAIN
 
@@ -86,7 +84,7 @@ fi
 ## The actual script
 # Start the health check script
 oklog "INFO" "Start health check script"
-/opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID
+/opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
 # Check if health check script was successfull
 if (( $? != "0" )); then
   STATUS="error"
