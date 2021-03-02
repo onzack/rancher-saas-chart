@@ -38,14 +38,14 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=error stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=$LEVEL stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 ## Check for needed environment variables
@@ -80,7 +80,7 @@ while (( $TRY > 0 ))
     # echo "DEBUG - The HEALT environment varialbe is: $HEALTH"
     if [ "$HEALTH" == "ok" ]; then
       STATUS="ok"
-      oklog "-OK-" "Rancher $INSTANCE_NAME up, running and healthy"
+      oklog "INFO" "Rancher $INSTANCE_NAME up, running and healthy"
       exit 0
     else
       oklog "INFO" "Rancher $INSTANCE_NAME is not ready yet, timeout in $TRY seconds"

@@ -37,14 +37,14 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=error stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=$LEVEL stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 cleanup () {
@@ -84,7 +84,7 @@ if (( $? != "0" )); then
   cleanup
   exit 1
 else
-  oklog "-OK-" "Health check script for $INSTANCE_NAME was successful"
+  oklog "INFO" "Health check script for $INSTANCE_NAME was successful"
 fi
 
 # Get Rancher login token
@@ -103,7 +103,7 @@ if (( $? != "0" )); then
   cleanup
   exit 1
 else
-  oklog "-OK-" "Rancher login was successful"
+  oklog "INFO" "Rancher login was successful"
 fi
     
 LOGINTOKEN=`echo $LOGINRESPONSE | jq -r .token`
@@ -125,7 +125,7 @@ if (( $? != "0" )); then
   cleanup
   exit 1
 else
-  oklog "-OK-" "Set Rancher admin password was successful"
+  oklog "INFO" "Set Rancher admin password was successful"
 fi
 
 # Force Rancher admin to change password on first login
@@ -142,7 +142,7 @@ if (( $? != "0" )); then
   cleanup
   exit 1
 else
-  oklog "-OK-" "Force Rancher admin to change password on first login was successful"
+  oklog "INFO" "Force Rancher admin to change password on first login was successful"
 fi
 
 # Set Rancher URL
@@ -160,9 +160,9 @@ if (( $? != "0" )); then
   cleanup
   exit 1
 else
-  oklog "-OK-" "Set Rancher URL was successful"
+  oklog "INFO" "Set Rancher URL was successful"
 fi
 STATUS="ok"
-oklog "-OK-" "Finished Rancher $INSTANCE_NAME deployment successfully"
+oklog "INFO" "Finished Rancher $INSTANCE_NAME deployment successfully"
 cleanup
 exit 0

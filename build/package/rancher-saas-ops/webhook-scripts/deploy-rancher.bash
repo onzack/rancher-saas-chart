@@ -48,14 +48,14 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=error stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=$LEVEL stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 returnlog () {
@@ -157,7 +157,7 @@ if (( $? != "0" )); then
   exit 0
 else
   STATUS="deploying"
-  oklog "-OK-" "Successfully created namespace $INSTANCE_NAME"
+  oklog "INFO" "Successfully created namespace $INSTANCE_NAME"
 fi
 
 # Deploy Rancher SaaS with Helm
@@ -181,7 +181,7 @@ if (( $? != "0" )); then
   exit 0
 else
   STATUS="ok"
-  oklog "-OK-" "Successfully started $INSTANCE_NAME deployment"
+  oklog "INFO" "Successfully started $INSTANCE_NAME deployment"
   returnlog "Successfully started $INSTANCE_NAME deployment"
 fi
 
@@ -189,5 +189,5 @@ fi
 tmux new -d /opt/webhook-scripts/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
 STATUS="ok"
-oklog "-OK-" "Started initial rancher configuration script"
+oklog "INFO" "Started initial rancher configuration script"
 exit 0
