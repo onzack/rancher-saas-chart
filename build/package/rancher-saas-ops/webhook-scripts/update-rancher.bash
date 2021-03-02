@@ -44,14 +44,14 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=update scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
   setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=update scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 returnlog () {
@@ -150,5 +150,5 @@ fi
 tmux new -d /opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
 
 STATUS="ok"
-oklog "INFO" "Started health check script after $DURATION ms"
+oklog "INFO" "Started health check script"
 exit 0
