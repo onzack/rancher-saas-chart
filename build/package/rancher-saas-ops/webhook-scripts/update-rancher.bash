@@ -43,30 +43,21 @@ setduration () {
 
 errorlog () {
   local MESSAGE="$1"
-  if [ -z "$JOB_ID" ]; then
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level=error stage=update message="'$MESSAGE'"' > $ERRORLOGTARGET
-  else
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level=error stage=update message="'$MESSAGE'"' > $ERRORLOGTARGET
-  fi
+  setduration
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=error stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
-  if [ -z "$JOB_ID" ]; then
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level="'$LEVEL'" stage=update message="'$MESSAGE'"' > $OKLOGTARGET
-  else
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level="'$LEVEL'" stage=update message="'$MESSAGE'"' > $OKLOGTARGET
-  fi
+  setduration
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=$LEVEL stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 returnlog () {
   local MESSAGE="$1"
-  if [ -z "$JOB_ID" ]; then
-    echo "{ \"job-id\":\"0\", \"status\":\"$STATUS\", \"duration\":\"$DURATION\", \"message\":\"$MESSAGE\" }"
-  else
-    echo "{ \"job-id\":\"$JOB_ID\", \"status\":\"$STATUS\", \"duration\":\"$DURATION\", \"message\":\"$MESSAGE\" }"
-  fi
+  setduration
+  echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
 }
 
 ## Check for needed files
@@ -124,9 +115,7 @@ fi
 
 ## Check status before proceede wiht actual script
 if [ "$STATUS" == "error" ]; then
-  STATUS="error"
-  setduration
-  errorlog "Something with the configuration is wrong, duration $DURATION ms"
+  errorlog "Configuration not correct"
   returnlog "Configuration not correct"
   exit 0
 fi
@@ -148,14 +137,12 @@ helm upgrade -n $INSTANCE_NAME \
 # Check if Helm was successfull
 if (( $? != "0" )); then
   STATUS="error"
-  setduration
-  errorlog "Helm did not complete successully, duration $DURATION ms"
+  errorlog "Helm not successful"
   returnlog "Helm not successful"
   exit 0
 else
   STATUS="updating"
-  setduration
-  oklog "OK" "Successfully started $INSTANCE_NAME update"
+  oklog "-OK-" "Successfully started $INSTANCE_NAME update"
   returnlog "Successfully started $INSTANCE_NAME update"
 fi
 
@@ -163,6 +150,5 @@ fi
 tmux new -d /opt/webhook-scripts/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
 
 STATUS="ok"
-setduration
-oklog "OK" "Started health check script after $DURATION ms"
+oklog "-OK-" "Started health check script after $DURATION ms"
 exit 0

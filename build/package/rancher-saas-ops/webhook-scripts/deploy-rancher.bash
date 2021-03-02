@@ -45,37 +45,23 @@ setduration () {
   DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
 }
 
-# ts=2020-08-25T16:55:42.986960888Z caller=spanlogger.go:53 org_id=29 traceID=2612c3ff044b7d02 method=Store.lookupIdsByMetricNameMatcher level=debug matcher="pod=\"loki-canary-25f2k\"" queries=16
-echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=1234567890 level=info stage=configure message="Rancher rancher-afi is not ready yet, 295 seconds remaining until timeout"' >> /proc/1/fd/1
-
 errorlog () {
   local MESSAGE="$1"
-  if [ -z "$JOB_ID" ]; then
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level=error stage=deploy message="'$MESSAGE'"' > $ERRORLOGTARGET
-  else
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level=error stage=deploy message="'$MESSAGE'"' > $ERRORLOGTARGET
-  fi
+  setduration
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=error stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
 }
 
 oklog () {
   local LEVEL="$1"
   local MESSAGE="$2"
-  if [ -z "$JOB_ID" ]; then
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level="'$LEVEL'" stage=deploy message="'$MESSAGE'"' > $OKLOGTARGET
-  else
-    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level="'$LEVEL'" stage=deploy message="'$MESSAGE'"' > $OKLOGTARGET
-  fi
+  setduration
+  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" jobID=$JOB_ID level=$LEVEL stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
 }
 
 returnlog () {
   local MESSAGE="$1"
-  if [ -z "$JOB_ID" ]; then
-    # duration as millims
-    # status: error, deploying
-    echo "{ \"jobId\":0, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
-  else
-    echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
-  fi
+  setduration
+  echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
 }
 
 ## Check for needed files
@@ -145,9 +131,7 @@ fi
 
 ## Check status before proceede wiht actual script
 if [ "$STATUS" == "error" ]; then
-  STATUS="error"
-  setduration
-  errorlog "Something with the configuration is wrong, duration $DURATION ms"
+  errorlog "Configuration not correct"
   returnlog "Configuration not correct"
   exit 0
 fi
@@ -168,14 +152,12 @@ metadata:
 EOF
 if (( $? != "0" )); then
   STATUS="error"
-  setduration
-  errorlog "Create namespace $INSTANCE_NAME not successully, duration $DURATION ms"
+  errorlog "Create namespace $INSTANCE_NAME not successful"
   returnlog "Create namespace $INSTANCE_NAME not successful"
   exit 0
 else
   STATUS="deploying"
-  setduration
-  oklog "OK" "Successfully created namespace $INSTANCE_NAME"
+  oklog "-OK-" "Successfully created namespace $INSTANCE_NAME"
 fi
 
 # Deploy Rancher SaaS with Helm
@@ -194,14 +176,12 @@ helm upgrade --install -n $INSTANCE_NAME \
 # Check if Helm was successful
 if (( $? != "0" )); then
   STATUS="error"
-  setduration
-  errorlog "Helm did not complete successully, duration $DURATION ms"
+  errorlog "Helm not successful"
   returnlog "Helm not successful"
   exit 0
 else
   STATUS="ok"
-  setduration
-  oklog "OK" "Successfully started $INSTANCE_NAME deployment"
+  oklog "-OK-" "Successfully started $INSTANCE_NAME deployment"
   returnlog "Successfully started $INSTANCE_NAME deployment"
 fi
 
@@ -209,6 +189,5 @@ fi
 tmux new -d /opt/webhook-scripts/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
 STATUS="ok"
-setduration
-oklog "OK" "Started initial rancher configuration script after $DURATION ms"
+oklog "-OK-" "Started initial rancher configuration script"
 exit 0
