@@ -45,22 +45,25 @@ setduration () {
   DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
 }
 
+# ts=2020-08-25T16:55:42.986960888Z caller=spanlogger.go:53 org_id=29 traceID=2612c3ff044b7d02 method=Store.lookupIdsByMetricNameMatcher level=debug matcher="pod=\"loki-canary-25f2k\"" queries=16
+echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=1234567890 level=info stage=configure message="Rancher rancher-afi is not ready yet, 295 seconds remaining until timeout"' >> /proc/1/fd/1
+
 errorlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - ERROR - Stage: deploy - $MESSAGE" > $ERRORLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level=error stage=deploy message="'$MESSAGE'"' > $ERRORLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - ERROR - Stage: deploy - $MESSAGE" > $ERRORLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level=error stage=deploy message="'$MESSAGE'"' > $ERRORLOGTARGET
   fi
 }
 
 oklog () {
-  local TYPE="$1"
+  local LEVEL="$1"
   local MESSAGE="$2"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - $TYPE - Stage: deploy - $MESSAGE" > $OKLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level="'$LEVEL'" stage=deploy message="'$MESSAGE'"' > $OKLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - $TYPE - Stage: deploy - $MESSAGE" > $OKLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level="'$LEVEL'" stage=deploy message="'$MESSAGE'"' > $OKLOGTARGET
   fi
 }
 

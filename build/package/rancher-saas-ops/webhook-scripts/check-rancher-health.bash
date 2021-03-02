@@ -38,19 +38,19 @@ setduration () {
 errorlog () {
   local MESSAGE="$1"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - ERROR - Stage: health - $MESSAGE" > $ERRORLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level=error stage=helthcheck message="'$MESSAGE'"' > $ERRORLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - ERROR - Stage: health - $MESSAGE" > $ERRORLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level=error stage=helthcheck message="'$MESSAGE'"' > $ERRORLOGTARGET
   fi
 }
 
 oklog () {
-  local TYPE="$1"
+  local LEVEL="$1"
   local MESSAGE="$2"
   if [ -z "$JOB_ID" ]; then
-    echo "Job-ID: 0 - $TYPE - Stage: health - $MESSAGE" > $OKLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID=0 level="'$LEVEL'" stage=helthcheck message="'$MESSAGE'"' > $OKLOGTARGET
   else
-    echo "Job-ID: $JOB_ID - $TYPE - Stage: health - $MESSAGE" > $OKLOGTARGET
+    echo 'time="'$(date +%d-%m-%Y\ %H:%M:%S)'" jobID="'$JOB_ID'" level="'$LEVEL'" stage=helthcheck message="'$MESSAGE'"' > $OKLOGTARGET
   fi
 }
 
