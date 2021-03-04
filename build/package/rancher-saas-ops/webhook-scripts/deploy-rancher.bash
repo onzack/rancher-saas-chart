@@ -1,9 +1,13 @@
 #!/bin/bash
 
-STARTTIME=$(date +%s%3N)
-
 ## Comments
-# We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
+# We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message
+
+export STARTTIME=$(date +%s%3N) 
+
+## Import other scripts
+# logging.bash for functions logToStderr, logToStdout and webhookResponse
+source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected environment variables
 # ENVIRONMENT_VALUES_FILE
@@ -24,121 +28,48 @@ STARTTIME=$(date +%s%3N)
 readonly INSTANCE_NAME="$1"
 readonly SIZE="$2"
 readonly ADMIN_PW="$3"
-readonly JOB_ID="$4"
+export readonly JOB_ID="$4"
 
-## Define varialbes for log output
-if [ "$LOCAL" == "true" ]
-  then
-    OKLOGTARGET="/dev/stdout"
-    ERRORLOGTARGET="/dev/stderr"
-  else
-    OKLOGTARGET="/proc/1/fd/1"
-    ERRORLOGTARGET="/proc/1/fd/2"
-fi
-
-## Define global variable
-STATUS="undefined"
-
-## Define functions
-setduration () {
-  local ENDTIME=$(date +%s%3N)
-  DURATION=$(echo "$ENDTIME - $STARTTIME" | bc -l)
-}
-
-errorlog () {
-  local MESSAGE="$1"
-  setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=ERROR jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $ERRORLOGTARGET
-}
-
-oklog () {
-  local LEVEL="$1"
-  local MESSAGE="$2"
-  setduration
-  echo "time=\"$(date +%d-%m-%Y\ %H:%M:%S)\" level=$LEVEL jobID=$JOB_ID stage=deploy scriptDuration=$DURATION message=\"$MESSAGE\"" > $OKLOGTARGET
-}
-
-returnlog () {
-  local MESSAGE="$1"
-  setduration
-  echo "{ \"jobId\":$JOB_ID, \"status\":\"$STATUS\", \"duration\":$DURATION, \"message\":\"$MESSAGE\" }"
-}
-
-## Check for needed files
-if [ ! -f $ENVIRONMENT_VALUES_FILE ]
-  then
-    STATUS="error"
-    errorlog "Environment values file does not exist"
-fi
+## Define global variables
+DEPLOY_PREFLIGHT_CHECK="undefined"
+DEPLOY_STAGE="deploy"
 
 ## Check for needed environment variables
-if [[ ! -v ENVIRONMENT_VALUES_FILE ]]
+logToStdout $DEPLOY_STAGE "INFO" "Start environment check script"
+/opt/webhook-scripts/modules/check-environment.bash
+if (( $? != "0" ))
   then
-    STATUS="error"
-    errorlog "Environment variable ENVIRONMENT_VALUES_FILE not set"
-fi
-
-if [[ ! -v INGRESS_KEY_BASE64 ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable INGRESS_KEY_BASE64 not set"
-fi
-
-if [[ ! -v INGRESS_CRT_BASE64 ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable INGRESS_CRT_BASE64 not set"
-fi
-
-if [[ ! -v INGRESS_CA_CRT_BASE64 ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable INGRESS_CA_CRT_BASE64 not set"
-fi
-
-if [[ ! -v DOMAIN ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable DOMAIN not set"
-fi
-
-if [[ ! -v RANCHER_CLUSTER_ID ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable RANCHER_CLUSTER_ID not set"
-fi
-
-if [[ ! -v RANCHER_PROJECT_ID ]]
-  then
-    STATUS="error"
-    errorlog "Environment variable RANCHER_PROJECT_ID not set"
+    DEPLOY_PREFLIGHT_CHECK="error"
+    logToStderr $DEPLOY_STAGE "Environment check script failed"
+  else
+    logToStdout $DEPLOY_STAGE "INFO" "Environment check script successful"
 fi
 
 ## Check needed arguments
 if [ "$#" -ne 4 ]; then
-  STATUS="error"
-  errorlog "Not the correct amount of arguments passed, expected 4"
-  errorlog "Pass the following arguments: instance-name, size, password, job-id"
+  DEPLOY_PREFLIGHT_CHECK="error"
+  logToStderr $DEPLOY_STAGE "Not the correct amount of arguments passed, expected 4"
+  logToStderr $DEPLOY_STAGE "Pass the following arguments: instance-name, size, password, job-id"
 fi
 
 ## Check kube-api connection
 kubectl get namespaces >> /dev/null
 if (( $? != "0" ))
   then
-    STATUS="error"
-    errorlog "Not able to connect to kube-api"
+    DEPLOY_PREFLIGHT_CHECK="error"
+    logToStderr $DEPLOY_STAGE "Not able to connect to kube-api"
 fi
 
-## Check status before proceede wiht actual script
-if [ "$STATUS" == "error" ]; then
-  errorlog "Configuration not correct"
-  returnlog "Configuration not correct"
+## Check DEPLOY_PREFLIGHT_CHECK before proceede wiht actual script
+if [ "$DEPLOY_PREFLIGHT_CHECK" == "error" ]; then
+  logToStderr $DEPLOY_STAGE "Configuration not correct"
+  webhookResponse "error" "Configuration not correct"
   exit 0
 fi
 
 ## The actual script
 # Create Namespace
-oklog "INFO" "Create namespace $INSTANCE_NAME"
+logToStdout $DEPLOY_STAGE "INFO" "Create namespace $INSTANCE_NAME"
 cat << EOF | kubectl apply -f - >> /dev/null
 apiVersion: v1
 kind: Namespace
@@ -151,17 +82,15 @@ metadata:
   name: $INSTANCE_NAME
 EOF
 if (( $? != "0" )); then
-  STATUS="error"
-  errorlog "Create namespace $INSTANCE_NAME not successful"
-  returnlog "Create namespace $INSTANCE_NAME not successful"
+  logToStderr $DEPLOY_STAGE "Create namespace $INSTANCE_NAME not successful"
+  webhookResponse "error" "Create namespace $INSTANCE_NAME not successful"
   exit 0
 else
-  STATUS="deploying"
-  oklog "INFO" "Successfully created namespace $INSTANCE_NAME"
+  logToStdout $DEPLOY_STAGE "INFO" "Successfully created namespace $INSTANCE_NAME"
 fi
 
 # Deploy Rancher SaaS with Helm
-oklog "INFO" "All Checks are OK, run Helm install"
+logToStdout $DEPLOY_STAGE "INFO" "All Checks are OK, run Helm install"
 helm upgrade --install -n $INSTANCE_NAME \
   -f /etc/rancher-saas/helm/size-$SIZE.yaml \
   -f $ENVIRONMENT_VALUES_FILE \
@@ -175,19 +104,17 @@ helm upgrade --install -n $INSTANCE_NAME \
 
 # Check if Helm was successful
 if (( $? != "0" )); then
-  STATUS="error"
-  errorlog "Helm not successful"
-  returnlog "Helm not successful"
+  logToStderr $DEPLOY_STAGE "Helm not successful"
+  webhookResponse "error" "Helm not successful"
   exit 0
 else
-  STATUS="ok"
-  oklog "INFO" "Successfully started $INSTANCE_NAME deployment"
-  returnlog "Successfully started $INSTANCE_NAME deployment"
+  logToStdout $DEPLOY_STAGE "INFO" "Successfully started $INSTANCE_NAME deployment"
+  webhookResponse "deploying" "Successfully started $INSTANCE_NAME deployment"
 fi
 
 # Start the script for the initial rancher configuration and send it to the background
-tmux new -d /opt/webhook-scripts/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
+tmux new -d /opt/webhook-scripts/modules/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
-STATUS="ok"
-oklog "INFO" "Started initial rancher configuration script"
+logToStdout $DEPLOY_STAGE "INFO" "Started initial rancher configuration script"
+unset DEPLOY_STAGE
 exit 0
