@@ -30,6 +30,9 @@ readonly JOB_ID="$3"
 UPDATE_PREFLIGHT_CHECK="undefined"
 UPDATE_STAGE="update"
 
+# Start logging
+logToStdout $UPDATE_STAGE "INFO" "START Rancher $INSTANCE_NAME update"
+
 ## Check for needed environment variables
 logToStdout $UPDATE_STAGE "INFO" "Start environment check script"
 /opt/webhook-scripts/modules/check-environment.bash
@@ -89,7 +92,7 @@ fi
 
 # Start the script for the initial rancher configuration and send it to the background
 logToStdout $UPDATE_STAGE "INFO" "Start health check script"
-tmux new -d /opt/webhook-scripts/modules/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME
+tmux new -d /opt/webhook-scripts/modules/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME update
 
 unset UPDATE_STAGE
 exit 0

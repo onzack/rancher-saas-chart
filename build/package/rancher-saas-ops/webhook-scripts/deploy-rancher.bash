@@ -3,7 +3,7 @@
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message
 
-export STARTTIME=$(date +%s%3N) 
+export STARTTIME=$(date +%s%3N)
 
 ## Import other scripts
 # logging.bash for functions logToStderr, logToStdout and webhookResponse
@@ -33,6 +33,9 @@ export readonly JOB_ID="$4"
 ## Define global variables
 DEPLOY_PREFLIGHT_CHECK="undefined"
 DEPLOY_STAGE="deploy"
+
+# Start logging
+logToStdout $DEPLOY_STAGE "INFO" "START Rancher $INSTANCE_NAME deployment"
 
 ## Check for needed environment variables
 logToStdout $DEPLOY_STAGE "INFO" "Start environment check script"

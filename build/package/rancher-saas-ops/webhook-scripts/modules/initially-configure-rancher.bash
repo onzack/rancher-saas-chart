@@ -42,7 +42,7 @@ fi
 ## The actual script
 # Start the health check script
 logToStdout $CONFIG_STAGE "INFO" "Start health check script"
-/opt/webhook-scripts/modules/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $INITIALSTARTTIME
+/opt/webhook-scripts/modules/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $INITIALSTARTTIME deploy
 # Check if health check script was successful
 if (( $? != "0" )); then
   logToStderr $CONFIG_STAGE "Health check script for $INSTANCE_NAME was not successful"
@@ -121,7 +121,7 @@ if (( $? != "0" )); then
 else
   logToStdout $CONFIG_STAGE "INFO" "Set Rancher URL was successful"
 fi
-logToStdout $CONFIG_STAGE "INFO" "Finished Rancher $INSTANCE_NAME deployment successfully"
+logToStdout $CONFIG_STAGE "INFO" "FINISHED Rancher $INSTANCE_NAME deployment successfully"
 
 cleanup
 unset CONFIG_STAGE
