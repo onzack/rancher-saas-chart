@@ -113,8 +113,8 @@ else
 fi
 
 # Start the script for the initial rancher configuration and send it to the background
+logToStdout $DEPLOY_STAGE "INFO" "Start initial rancher configuration script"
 tmux new -d /opt/webhook-scripts/modules/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
-logToStdout $DEPLOY_STAGE "INFO" "Started initial rancher configuration script"
 unset DEPLOY_STAGE
 exit 0

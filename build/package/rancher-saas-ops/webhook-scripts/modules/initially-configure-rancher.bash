@@ -53,7 +53,7 @@ else
 fi
 
 # Get Rancher login token
-logToStdout "INFO" "Get Rancher login token"
+logToStdout $CONFIG_STAGE "INFO" "Get Rancher login token"
 LOGINRESPONSE="undefined"
 LOGINTOKEN="undefined"
 USERID="undefined"
