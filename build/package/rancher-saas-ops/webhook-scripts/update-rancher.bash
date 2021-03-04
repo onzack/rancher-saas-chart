@@ -31,14 +31,14 @@ UPDATE_PREFLIGHT_CHECK="undefined"
 UPDATE_STAGE="update"
 
 ## Check for needed environment variables
-logToStdout $DEPLOY_STAGE "INFO" "Start environment check script"
+logToStdout $UPDATE_STAGE "INFO" "Start environment check script"
 /opt/webhook-scripts/modules/check-environment.bash
 if (( $? != "0" ))
   then
     UPDATE_PREFLIGHT_CHECK="error"
-    logToStderr $DEPLOY_STAGE "Environment check script failed"
+    logToStderr $UPDATE_STAGE "Environment check script failed"
   else
-    logToStdout $DEPLOY_STAGE "INFO" "Environment check script successful"
+    logToStdout $UPDATE_STAGE "INFO" "Environment check script successful"
 fi
 
 ## Check needed arguments
