@@ -14,8 +14,8 @@ RUN apt-get update && \
     apt-get -y autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-COPY --chown=zack:zack webhooks/* /etc/webhooks/
-COPY --chown=zack:zack webhook-scripts/* /opt/webhook-scripts/
+COPY --chown=zack:zack webhooks /etc/webhooks
+COPY --chown=zack:zack webhook-scripts /opt/webhook-scripts
 COPY --chown=zack:zack helm /etc/rancher-saas/helm
 USER 10000
 WORKDIR /home/zack
