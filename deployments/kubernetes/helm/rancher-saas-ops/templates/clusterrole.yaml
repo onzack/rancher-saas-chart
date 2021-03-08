@@ -13,6 +13,7 @@ rules:
   resources:
   - namespaces
   - statefulsets
+  - statefulsets/scale
   - services
   - secrets
   - ingresses
