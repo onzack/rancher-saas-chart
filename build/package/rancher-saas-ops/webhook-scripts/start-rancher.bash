@@ -49,7 +49,7 @@ fi
 ## The actual script
 # Scale Rancher down to 0
 logToStdout $START_STAGE "INFO" "All Checks are OK, run kubectl scale"
-kubectl scale -n $INSTANCE_NAME statefulset.v1.apps/rancher --replicas=1
+kubectl scale statefulset rancher -n $INSTANCE_NAME --replicas=1
 
 # Check if kubectl was successfull
 if (( $? != "0" )); then
