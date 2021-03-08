@@ -59,6 +59,8 @@ spec:
             value: {{ .Values.timezone }}
           - name: TOKEN
             value: {{ .Values.token }}
+          - name: DOMAIN
+            value: {{ .Values.ingress.domain }}
         resources:
           requests:
             memory: {{ .Values.deployAPI.requests.memory | quote }}
