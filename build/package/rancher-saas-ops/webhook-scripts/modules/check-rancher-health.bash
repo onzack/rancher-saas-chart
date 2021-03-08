@@ -45,8 +45,8 @@ while (( $TRY > 0 ))
     HEALTH=$(curl -k -s https://$INSTANCE_NAME.$DOMAIN/healthz | head -n 1)
     # echo "DEBUG - The HEALT environment varialbe is: $HEALTH"
     if [ "$HEALTH" == "ok" ]; then
-      if [ "$ACTION" == "update" ]; then
-        logToStdout $HEALTH_CHECK_STAGE "INFO" "FINISHED update, Rancher $INSTANCE_NAME up, running and healthy"
+      if [ "$ACTION" == "update" ] || [ "$ACTION" == "start" ]; then
+        logToStdout $HEALTH_CHECK_STAGE "INFO" "FINISHED health check, Rancher $INSTANCE_NAME up, running and healthy"
       else
         logToStdout $HEALTH_CHECK_STAGE "INFO" "Rancher $INSTANCE_NAME up, running and healthy"
       fi  
@@ -58,7 +58,7 @@ while (( $TRY > 0 ))
     fi
 done
 
-logToStderr $HEALTH_CHECK_STAGE "FINISHED with timeout while waiting for Rancher $INSTANCE_NAME"
+logToStderr $HEALTH_CHECK_STAGE "FINISHED health check with timeout while waiting for Rancher $INSTANCE_NAME"
 
 unset HEALTH_CHECK_STAGE
 exit 0

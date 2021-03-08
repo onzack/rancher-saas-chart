@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ops-api
+  {{- if .Values.ingress.letsEncrypt.enabled }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  {{- end }}
+spec:
+  rules:
+  - host: "{{ .Values.ingress.opsAPIHost }}.{{ .Values.ingress.domain }}"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ops-api
+            port:
+              number: 9000
+  tls:
+    - hosts:
+      - "{{ .Values.ingress.opsAPIHost }}.{{ .Values.ingress.domain }}"
+      {{- if .Values.ingress.letsEncrypt.enabled }}
+      secretName: ops-api-tls-letsencrypt
+      {{- else }}
+      secretName: {{ .Values.ingress.TLSsecretName }}
+      {{- end }}

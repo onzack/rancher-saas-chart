@@ -39,6 +39,7 @@ ingress:
   # Domain for ingress host, added to instanceName
   deployAPIHost: deploy-api
   updateAPIHost: update-api
+  opsAPIHost: ops-api
   domain: example.com
   # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
   TLSsecretName: custom-ingress-tls
