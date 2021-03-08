@@ -3,7 +3,7 @@
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
 
-STARTTIME=$(date +%s%3N)
+export STARTTIME=$(date +%s%3N)
 
 ## Import other scripts
 # logging.bash for functions logToStderr, logToStdout and webhookResponse
@@ -15,7 +15,7 @@ source /opt/webhook-scripts/modules/logging.bash
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
-readonly JOB_ID="$2"
+export readonly JOB_ID="$2"
 
 ## Define global variables
 STOP_PREFLIGHT_CHECK="undefined"
@@ -57,7 +57,7 @@ if (( $? != "0" )); then
   webhookResponse "error" "kubeclt scale not successful"
   exit 0
 else
-  logToStdout $STOP_STAGE "INFO" "Successfully stopped $INSTANCE_NAME"
+  logToStdout $STOP_STAGE "INFO" "FINISHED successfully stopped $INSTANCE_NAME"
   webhookResponse "stopping" "Successfully stopped $INSTANCE_NAME"
 fi
 

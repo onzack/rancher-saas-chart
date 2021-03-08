@@ -3,11 +3,14 @@
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
 
-STARTTIME=$(date +%s%3N)
+export STARTTIME=$(date +%s%3N)
 
 ## Import other scripts
 # logging.bash for functions logToStderr, logToStdout and webhookResponse
 source /opt/webhook-scripts/modules/logging.bash
+
+## Expected environment variables
+# DOMAIN
 
 ## Expected arguments
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
@@ -15,7 +18,7 @@ source /opt/webhook-scripts/modules/logging.bash
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
-readonly JOB_ID="$2"
+export readonly JOB_ID="$2"
 
 ## Define global variables
 START_PREFLIGHT_CHECK="undefined"
