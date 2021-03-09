@@ -56,7 +56,7 @@ if [ "$#" -ne 4 ]; then
 fi
 
 ## Check kube-api connection
-kubectl get namespaces >> /dev/null
+kubectl get namespaces > /dev/null 2>&1
 if (( $? != "0" ))
   then
     DEPLOY_PREFLIGHT_CHECK="error"
@@ -73,7 +73,7 @@ fi
 ## The actual script
 # Create Namespace
 logToStdout $DEPLOY_STAGE "INFO" "Create namespace $INSTANCE_NAME"
-cat << EOF | kubectl apply -f - >> /dev/null
+cat << EOF | kubectl apply -f - > /dev/null 2>&1
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -103,7 +103,7 @@ helm upgrade --install -n $INSTANCE_NAME \
   --set ingress.CAcert=$INGRESS_CA_CRT_BASE64 \
   --set rancher.instanceName=$INSTANCE_NAME \
   --set ingress.domain=$DOMAIN \
-  $INSTANCE_NAME /etc/rancher-saas/helm >> /dev/null
+  $INSTANCE_NAME /etc/rancher-saas/helm > /dev/null 2>&1
 
 # Check if Helm was successful
 if (( $? != "0" )); then

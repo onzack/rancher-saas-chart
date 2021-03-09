@@ -95,7 +95,7 @@ curl -X PUT -s "https://$INSTANCE_NAME.$DOMAIN/v3/users/$USERID" \
   -H 'content-type: application/json' \
   -H "Authorization: Bearer $LOGINTOKEN" \
   --data-binary '{"mustChangePassword": true}' \
-  --insecure >> /dev/null
+  --insecure > /dev/null 2>&1
 # Check if forcing Rancher admin to change password on first login was successful
 if (( $? != "0" )); then
   logToStderr $CONFIG_STAGE "Force Rancher admin to change password on first login not successful"
@@ -112,7 +112,7 @@ curl -s "https://$INSTANCE_NAME.$DOMAIN/v3/settings/server-url" \
   -H "Authorization: Bearer $LOGINTOKEN" \
   -X PUT \
   --data-binary '{"name":"server-url","value":"'$INSTANCE_NAME.$DOMAIN'"}' \
-  --insecure >> /dev/null
+  --insecure > /dev/null 2>&1
 # Check if Rancher URL setting was successful
 if (( $? != "0" )); then
   logToStderr $CONFIG_STAGE "Set Rancher URL did not complete successully"

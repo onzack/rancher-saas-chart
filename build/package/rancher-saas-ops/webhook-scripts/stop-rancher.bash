@@ -32,7 +32,7 @@ if [ "$#" -ne 2 ]; then
 fi
 
 ## Check kube-api connection
-kubectl get namespaces >> /dev/null
+kubectl get namespaces > /dev/null 2>&1
 if (( $? != "0" ))
   then
     STOP_PREFLIGHT_CHECK="error"
