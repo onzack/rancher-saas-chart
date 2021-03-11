@@ -3,15 +3,21 @@ This repository contains the Code for ONZACK Rancher Software as a Service.
 
 # Quick Start
 
-Prerequisites:
-- Kubernetes cluster with an Ingress Controller
+## Prepare
+Your need:
+- A Kubernetes cluster with an Ingress Controller
 - A loadbalancer or DNS entry for *.rancher.example.com pointing to your cluster
 - TLS keys and certificates
 
 Make sure to replace *.rancher.example.com with the values from your environment.
 
+## Install
+Clone this repository:
 ```
 git clone -b refactoring https://github.com/onzack/rancher-saas-chart.git
+```
+Create a custom values file for Helm:
+```
 cat << EOF >> custom-values.yaml
 # Infrastructure environemnt specific values for Rancher SaaS.
 # This is a YAML-formatted file.
@@ -31,6 +37,9 @@ ingress:
   letsEncrypt:
     enabled: false
 EOF
+```
+Install a Rancher SaaS instance with the name "rancher-dev1":
+```
 helm upgrade --install -n rancher-dev1 \
   -f ./rancher-saas-chart/deployments/kubernetes/helm/rancher-saas/size-S.yaml \
   -f custom-values.yaml \
