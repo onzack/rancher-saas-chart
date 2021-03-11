@@ -1,37 +1,50 @@
 # ONZACK Rancher Software as a Service Helm Chart
-This repository contains the Helm Chart for ONZACK Rancher Software as a Service.  
-The Helm Chart is designed as a Rancher Chart for better use experience together with Rancher.  
-[See official Rancher documentation](https://rancher.com/docs/rancher/v2.x/en/helm-charts/legacy-catalogs/creating-apps/)
+This repository contains the Code for ONZACK Rancher Software as a Service.    
 
-# Installation
-### Prepare
-1. Create a Namespace:
-```
-kubectl create namespace <namespace>
-```
-2. Create secret containing credentials for InfluxDB, if you plan to use Rancher-Guard as monitoring tool:
-```
-kubectl -n <namespace> create secret generic rancher-guard-secret --from-literal=influxDBUser=<some user> --from-literal=influxDBPW='<some password>'
-```
-3. Create secret containing the custom CA certificate, matching the ingress TLS certificate, if you don't use the Let's Encrypt option:
-```
-kubectl -n <namespace> create secret tls custom-internal-ca --cert=<path/to/cert/file>
-```
+# Quick Start
 
-### Install
-1. Clone this repository:
+Prerequisites:
+- Kubernetes cluster with an Ingress Controller
+- A loadbalancer or DNS entry for *.rancher.example.com pointing to your cluster
+- TLS keys and certificates
+
+Make sure to replace *.rancher.example.com with the values from your environment.
+
 ```
-git clone https://github.com/onzack/rancher-saas-chart.git
+git clone -b refactoring https://github.com/onzack/rancher-saas-chart.git
+cat << EOF >> custom-values.yaml
+# Infrastructure environemnt specific values for Rancher SaaS.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ 
+rancher:
+  tag: v2.5.6
+  twoPointFive: true
+ 
+rancherGuard:
+  enabled: false
+  
+storage:
+  enabled: false
+ 
+ingress:
+  letsEncrypt:
+    enabled: false
+EOF
+helm upgrade --install -n rancher-dev1 \
+  -f ./rancher-saas-chart/deployments/kubernetes/helm/rancher-saas/size-S.yaml \
+  -f custom-values.yaml \
+  --set rancher.size=S \
+  --set ingress.TLSkey="TLS Key base64 encoded" \
+  --set ingress.TLScert="TLS Cert base64 encoded" \
+  --set ingress.CAcert="TLS CA cert base64 encoded" \
+  --set rancher.instanceName=rancher-dev1 \
+  --set ingress.domain="rancher.example.com" \
+  rancher-dev1 ./rancher-saas-chart/deployments/kubernetes/helm/rancher-saas
 ```
-2. Adjust values.yaml file:
-```
-cp ./deployments/kubernetes/helm/values.yaml ./custom-values.yaml
-vim ./custom-values.yaml
-```
-3. Install Helm Chart:
-```
-helm install -f custom-values.yaml -f size-[S|M|L].yaml -n <namespace> <instalnceName> ./deployments/kubernetes/helm
-```
+To access your new Rancher instance go to https://rancher-dev1.rancher.example.com.   
+
+More documentation will follow.
 
 # Licence
 Copyright 2021 ONZACK AG
