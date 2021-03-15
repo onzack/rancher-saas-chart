@@ -57,9 +57,8 @@ if (( $? != "0" )); then
   webhookResponse "error" "kubeclt scale not successful"
   exit 0
 else
-  logToStdout $STOP_STAGE "INFO" "FINISHED successfully stopped $INSTANCE_NAME"
-  webhookResponse "stopping" "Successfully stopped $INSTANCE_NAME"
-fi
+  logToStdout $STOP_STAGE "INFO" "FINISHED successfully sent stop command for $INSTANCE_NAME"
+  webhookResponse "stopping" "Successfully sent stop command for $INSTANCE_NAME"
 
 unset STOP_STAGE
 exit 0

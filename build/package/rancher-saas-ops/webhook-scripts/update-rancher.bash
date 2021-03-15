@@ -3,7 +3,7 @@
 ## Comments
 # We use exit 0 also for failues, with exti 1 the webhook does not reply with out custom error message 
 
-STARTTIME=$(date +%s%3N)
+export STARTTIME=$(date +%s%3N)
 
 ## Import other scripts
 # logging.bash for functions logToStderr, logToStdout and webhookResponse

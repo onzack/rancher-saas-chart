@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: environment-values
+  name: default-values
 data:
   environment.yaml: |
     # Infrastructure environemnt specific values for Rancher SaaS.

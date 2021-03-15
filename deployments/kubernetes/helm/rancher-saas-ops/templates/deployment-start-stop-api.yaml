@@ -85,14 +85,6 @@ spec:
           httpGet:
             path: /hooks/readiness
             port: 9000
-        volumeMounts:
-          - name: environment-values
-            mountPath: {{ .Values.environmentValuesFile }}
-            subPath: environment.yaml
-      volumes:
-        - name: environment-values
-          configMap:
-            name: environment-values
       serviceAccountName: rancher-saas-ops
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}

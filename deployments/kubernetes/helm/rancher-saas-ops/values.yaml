@@ -39,7 +39,8 @@ startStopAPI:
   
 token: REDACTED
 rancherClusterID: REDACTED
-rancherProjectID: REDACTED  
+rancherProjectID: REDACTED
+environmentConfigMap: default-values
 environmentValuesFile: /etc/rancher-saas/environment.yaml
 
 ingress:

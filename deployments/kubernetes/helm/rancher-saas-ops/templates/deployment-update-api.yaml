@@ -100,7 +100,7 @@ spec:
       volumes:
         - name: environment-values
           configMap:
-            name: environment-values
+            name: {{ .Values.environmentConfigMap }}
       serviceAccountName: rancher-saas-ops
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}

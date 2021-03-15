@@ -60,8 +60,8 @@ if (( $? != "0" )); then
   webhookResponse "error" "kubeclt scale not successful"
   exit 0
 else
-  logToStdout $START_STAGE "INFO" "Successfully started $INSTANCE_NAME"
-  webhookResponse "starting" "Successfully started $INSTANCE_NAME"
+  logToStdout $START_STAGE "INFO" "Successfully sent start command for $INSTANCE_NAME"
+  webhookResponse "starting" "Successfully sent start command for $INSTANCE_NAME"
 fi
 
 # Start the script for the initial rancher configuration and send it to the background
