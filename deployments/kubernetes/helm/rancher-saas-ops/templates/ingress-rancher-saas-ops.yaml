@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ops-api
+  name: {{ .Values.ingress.host }}
   {{- if .Values.ingress.letsEncrypt.enabled }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -29,14 +29,14 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: start-api
+            name: start-stop-api
             port:
               number: 9000
       - path: /hooks/stop
         pathType: Prefix
         backend:
           service:
-            name: stop-api
+            name: start-stop-api
             port:
               number: 9000
   tls:
