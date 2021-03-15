@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ops-api
+  name: start-stop-api
 spec:
   selector:
     app: rancher-saas-ops
-    role: ops-api
+    role: start-stop-api
   ports:
   - name: hattp
     protocol: TCP

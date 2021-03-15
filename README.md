@@ -4,7 +4,7 @@ This repository contains the Code for ONZACK Rancher Software as a Service.
 # Quick Start
 
 ## Prepare
-Your need:
+You need:
 - A Kubernetes cluster with an Ingress Controller
 - A loadbalancer or DNS entry for *.rancher.example.com pointing to your cluster
 - TLS keys and certificates

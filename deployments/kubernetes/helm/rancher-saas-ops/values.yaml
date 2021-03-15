@@ -37,9 +37,7 @@ ingress:
   letsEncrypt:
     enabled: false
   # Domain for ingress host, added to instanceName
-  deployAPIHost: deploy-api
-  updateAPIHost: update-api
-  opsAPIHost: ops-api
+  host: rancher-saas-ops
   domain: example.com
   # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
   TLSsecretName: custom-ingress-tls

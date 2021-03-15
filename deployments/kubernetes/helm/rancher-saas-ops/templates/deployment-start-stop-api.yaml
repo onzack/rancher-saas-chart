@@ -4,14 +4,14 @@ kind: Deployment
 metadata:
   labels:
     app: rancher-saas-ops
-    role: ops-api
-  name: ops-api
+    role: start-stop-api
+  name: start-stop-api
 spec:
-  replicas: {{ .Values.deployAPI.replicas }}
+  replicas: {{ .Values.startStopAPI.replicas }}
   selector:
     matchLabels:
       app: rancher-saas-ops
-      role: ops-api
+      role: start-stop-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -21,7 +21,7 @@ spec:
     metadata:
       labels:
         app: rancher-saas-ops
-        role: ops-api
+        role: start-stop-api
     spec:
       affinity:
         podAntiAffinity:
@@ -31,14 +31,14 @@ spec:
               - key: role
                 operator: In
                 values:
-                - ops-api
+                - start-stop-api
             topologyKey: "kubernetes.io/hostname"
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
         fsGroup: 10000
       containers:
-      - name: deploy-api
+      - name: start-stop-api
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         args:
           - -hooks=/etc/webhooks/readiness.json
@@ -63,11 +63,11 @@ spec:
             value: {{ .Values.ingress.domain }}
         resources:
           requests:
-            memory: {{ .Values.deployAPI.requests.memory | quote }}
-            cpu: {{ .Values.deployAPI.requests.cpu | quote }}
+            memory: {{ .Values.startStopAPI.requests.memory | quote }}
+            cpu: {{ .Values.startStopAPI.requests.cpu | quote }}
           limits:
-            memory: {{ .Values.deployAPI.limits.memory | quote }}
-            cpu: {{ .Values.deployAPI.limits.cpu | quote }}
+            memory: {{ .Values.startStopAPI.limits.memory | quote }}
+            cpu: {{ .Values.startStopAPI.limits.cpu | quote }}
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 5

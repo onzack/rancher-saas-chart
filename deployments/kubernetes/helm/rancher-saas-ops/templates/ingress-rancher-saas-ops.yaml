@@ -8,14 +8,35 @@ metadata:
   {{- end }}
 spec:
   rules:
-  - host: "{{ .Values.ingress.opsAPIHost }}.{{ .Values.ingress.domain }}"
+  - host: "{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"
     http:
       paths:
-      - path: /
+      - path: /hooks/deploy
         pathType: Prefix
         backend:
           service:
-            name: ops-api
+            name: deploy-api
+            port:
+              number: 9000
+      - path: /hooks/update
+        pathType: Prefix
+        backend:
+          service:
+            name: update-api
+            port:
+              number: 9000
+      - path: /hooks/start
+        pathType: Prefix
+        backend:
+          service:
+            name: start-api
+            port:
+              number: 9000
+      - path: /hooks/stop
+        pathType: Prefix
+        backend:
+          service:
+            name: stop-api
             port:
               number: 9000
   tls:
