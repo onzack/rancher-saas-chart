@@ -41,7 +41,7 @@ spec:
               number: 9000
   tls:
     - hosts:
-      - "{{ .Values.ingress.opsAPIHost }}.{{ .Values.ingress.domain }}"
+      - "{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"
       {{- if .Values.ingress.letsEncrypt.enabled }}
       secretName: ops-api-tls-letsencrypt
       {{- else }}
