@@ -57,7 +57,7 @@ kubectl scale statefulset rancher -n $INSTANCE_NAME --replicas=1 > /dev/null 2>&
 # Check if kubectl was successfull
 if (( $? != "0" )); then
   logToStderr $START_STAGE "kubectl scale not successful"
-  webhookResponse "error" "kubeclt scale not successful"
+  webhookResponse "error" "kubectl scale not successful"
   exit 0
 else
   logToStdout $START_STAGE "INFO" "Successfully sent start command for $INSTANCE_NAME"
