@@ -49,8 +49,7 @@ fi
 ## The actual script
 # Scale Rancher down to 0
 logToStdout $STOP_STAGE "INFO" "All Checks are OK, run kubectl scale"
-kubectl scale statefulset rancher -n $INSTANCE_NAME --replicas=0
-#kubectl scale statefulset rancher -n $INSTANCE_NAME --replicas=0 > /dev/null 2>&1
+kubectl scale statefulset rancher -n $INSTANCE_NAME --replicas=0 > /dev/null 2>&1
 
 
 # Check if kubectl was successfull
@@ -61,6 +60,6 @@ if (( $? != "0" )); then
 else
   logToStdout $STOP_STAGE "INFO" "FINISHED successfully sent stop command for $INSTANCE_NAME"
   webhookResponse "stopping" "Successfully sent stop command for $INSTANCE_NAME"
-
-unset STOP_STAGE
-exit 0
+  unset STOP_STAGE
+  exit 0
+fi
