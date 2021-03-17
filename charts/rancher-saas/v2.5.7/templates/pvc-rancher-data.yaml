@@ -1,0 +1,13 @@
+{{- if .Values.storage.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rancher-data-{{ .Values.rancher.instanceName }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.dataSize }}
+  storageClassName: {{ .Values.storage.storageClassName }}
+{{- end }}

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rancher
+  {{- if .Values.ingress.letsEncrypt }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  {{- end }}
+spec:
+  rules:
+  - host: "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rancher
+            port:
+              number: 80
+  tls:
+    - hosts:
+      - "{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"
+      {{- if .Values.ingress.letsEncrypt }}
+      secretName: {{ .Values.rancher.instanceName }}-letsencrypt
+      {{- else }}
+      secretName: {{ .Values.ingress.secretName }}
+      {{- end }}
