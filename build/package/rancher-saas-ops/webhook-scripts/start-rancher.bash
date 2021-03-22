@@ -14,7 +14,7 @@ source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
 # $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $3: Job ID, integer
+# $2: Job ID, integer
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"

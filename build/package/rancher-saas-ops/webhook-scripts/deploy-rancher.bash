@@ -26,7 +26,8 @@ source /opt/webhook-scripts/modules/logging.bash
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
-readonly SIZE="$2"
+### Convert size character to uppercase
+readonly SIZE="${2^^}"
 readonly ADMIN_PW="$3"
 export readonly JOB_ID="$4"
 
