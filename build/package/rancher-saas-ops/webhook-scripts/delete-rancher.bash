@@ -49,7 +49,7 @@ fi
 ## The actual script
 # Start the script for the initial rancher configuration and send it to the background
 logToStdout $START_STAGE "INFO" "Start health check script"
-tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $STARTTIME
+tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $JOB_ID $STARTTIME
 
 webhookResponse "deleting" "Successfully sent delete command for $INSTANCE_NAME"
 unset DELETE_STAGE
