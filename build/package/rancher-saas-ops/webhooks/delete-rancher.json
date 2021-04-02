@@ -1,7 +1,7 @@
 [
   {
-    "id": "delete",
-    "execute-command": "/opt/webhook-scripts/delete-rancher.bash",
+    "id": "start",
+    "execute-command": "/opt/webhook-scripts/start-rancher.bash",
     "include-command-output-in-response": true,
     "pass-arguments-to-command":
     [

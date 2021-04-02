@@ -39,6 +39,13 @@ spec:
             name: start-stop-api
             port:
               number: 9000
+      - path: /hooks/delete
+        pathType: Prefix
+        backend:
+          service:
+            name: delete-api
+            port:
+              number: 9000
   tls:
     - hosts:
       - "{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"

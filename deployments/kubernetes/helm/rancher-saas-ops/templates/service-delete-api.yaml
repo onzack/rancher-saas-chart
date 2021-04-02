@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: delete-api
+  name: start-stop-api
 spec:
   selector:
     app: rancher-saas-ops
-    role: delete-api
+    role: start-stop-api
   ports:
   - name: hattp
     protocol: TCP
