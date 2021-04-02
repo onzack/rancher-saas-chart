@@ -7,11 +7,11 @@ namespace: rancher-saas-ops
 
 image:
   repository: harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-ops
-  tag: v0.1.51
+  tag: v0.1.52
   imagePullSecret: REDACTED
 
 deployAPI:
-  replicas: 3
+  replicas: 2
   requests:
     memory: 100Mi
     cpu: 50m
@@ -20,7 +20,7 @@ deployAPI:
     cpu: 500m
 
 updateAPI:
-  replicas: 3
+  replicas: 2
   requests:
     memory: 100Mi
     cpu: 50m
@@ -28,8 +28,17 @@ updateAPI:
     memory: 1Gi
     cpu: 500m
 
-startStopAPI:
-  replicas: 3
+startAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+stopAPI:
+  replicas: 2
   requests:
     memory: 100Mi
     cpu: 50m
@@ -38,7 +47,7 @@ startStopAPI:
     cpu: 500m
 
 deleteAPI:
-  replicas: 3
+  replicas: 2
   requests:
     memory: 100Mi
     cpu: 50m

@@ -40,7 +40,10 @@ spec:
       containers:
       - name: update-api
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        args: ["-hooks=/etc/webhooks/readiness.json","-hooks=/etc/webhooks/update-rancher.json","-template"]
+        args:
+          - -hooks=/etc/webhooks/readiness.json
+          - -hooks=/etc/webhooks/update-rancher.json
+          - -template
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

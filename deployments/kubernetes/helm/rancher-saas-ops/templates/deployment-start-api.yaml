@@ -4,14 +4,14 @@ kind: Deployment
 metadata:
   labels:
     app: rancher-saas-ops
-    role: start-stop-api
-  name: start-stop-api
+    role: start-api
+  name: start-api
 spec:
-  replicas: {{ .Values.startStopAPI.replicas }}
+  replicas: {{ .Values.startAPI.replicas }}
   selector:
     matchLabels:
       app: rancher-saas-ops
-      role: start-stop-api
+      role: start-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -21,7 +21,7 @@ spec:
     metadata:
       labels:
         app: rancher-saas-ops
-        role: start-stop-api
+        role: start-api
     spec:
       affinity:
         podAntiAffinity:
@@ -31,18 +31,17 @@ spec:
               - key: role
                 operator: In
                 values:
-                - start-stop-api
+                - start-api
             topologyKey: "kubernetes.io/hostname"
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
         fsGroup: 10000
       containers:
-      - name: start-stop-api
+      - name: start-api
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         args:
           - -hooks=/etc/webhooks/readiness.json
-          - -hooks=/etc/webhooks/stop-rancher.json
           - -hooks=/etc/webhooks/start-rancher.json
           - -template
         imagePullPolicy: IfNotPresent
@@ -63,11 +62,11 @@ spec:
             value: {{ .Values.ingress.domain }}
         resources:
           requests:
-            memory: {{ .Values.startStopAPI.requests.memory | quote }}
-            cpu: {{ .Values.startStopAPI.requests.cpu | quote }}
+            memory: {{ .Values.startAPI.requests.memory | quote }}
+            cpu: {{ .Values.startAPI.requests.cpu | quote }}
           limits:
-            memory: {{ .Values.startStopAPI.limits.memory | quote }}
-            cpu: {{ .Values.startStopAPI.limits.cpu | quote }}
+            memory: {{ .Values.startAPI.limits.memory | quote }}
+            cpu: {{ .Values.startAPI.limits.cpu | quote }}
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 5

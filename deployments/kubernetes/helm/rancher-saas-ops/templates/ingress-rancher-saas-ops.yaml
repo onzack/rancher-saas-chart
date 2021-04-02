@@ -29,14 +29,14 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: start-stop-api
+            name: start-api
             port:
               number: 9000
       - path: /hooks/stop
         pathType: Prefix
         backend:
           service:
-            name: start-stop-api
+            name: stop-api
             port:
               number: 9000
       - path: /hooks/delete
