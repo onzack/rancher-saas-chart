@@ -47,21 +47,10 @@ if [ "$DELETE_PREFLIGHT_CHECK" == "error" ]; then
 fi
 
 ## The actual script
-# Scale Rancher down to 0
-logToStdout $DELETE_STAGE "INFO" "All Checks are OK, run kubectl delete namespace"
-kubectl delete namespace $INSTANCE_NAME > /dev/null 2>&1
-# TODO: use tmux to avoid kubectl delete namespace command to finish, it takes to long
-# tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $STARTTIME
+# Start the script for the initial rancher configuration and send it to the background
+logToStdout $START_STAGE "INFO" "Start health check script"
+tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $STARTTIME
 
-
-# Check if kubectl was successfull
-if (( $? != "0" )); then
-  logToStderr $DELETE_STAGE "kubectl delete namespace not successful"
-  webhookResponse "error" "kubectl delete namespace not successful"
-  exit 0
-else
-  logToStdout $DELETE_STAGE "INFO" "FINISHED successfully sent delete command for $INSTANCE_NAME"
-  webhookResponse "stopping" "Successfully sent delete command for $INSTANCE_NAME"
-  unset DELETE_STAGE
-  exit 0
-fi
+webhookResponse "deleting" "Successfully sent delete command for $INSTANCE_NAME"
+unset DELETE_STAGE
+exit 0
