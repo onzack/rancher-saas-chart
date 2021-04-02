@@ -50,6 +50,8 @@ fi
 # Scale Rancher down to 0
 logToStdout $DELETE_STAGE "INFO" "All Checks are OK, run kubectl delete namespace"
 kubectl delete namespace $INSTANCE_NAME > /dev/null 2>&1
+# TODO: use tmux to avoid kubectl delete namespace command to finish, it takes to long
+# tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $STARTTIME
 
 
 # Check if kubectl was successfull
