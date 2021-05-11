@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.host }}
+  {{- if .Values.ingress.letsEncrypt.enabled }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  {{- end }}
+spec:
+  rules:
+  - host: "{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"
+    http:
+      paths:
+      - path: /hooks/deploy
+        pathType: Prefix
+        backend:
+          service:
+            name: deploy-api
+            port:
+              number: 9000
+      - path: /hooks/update
+        pathType: Prefix
+        backend:
+          service:
+            name: update-api
+            port:
+              number: 9000
+      - path: /hooks/start
+        pathType: Prefix
+        backend:
+          service:
+            name: start-api
+            port:
+              number: 9000
+      - path: /hooks/stop
+        pathType: Prefix
+        backend:
+          service:
+            name: stop-api
+            port:
+              number: 9000
+      - path: /hooks/delete
+        pathType: Prefix
+        backend:
+          service:
+            name: delete-api
+            port:
+              number: 9000
+  tls:
+    - hosts:
+      - "{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}"
+      {{- if .Values.ingress.letsEncrypt.enabled }}
+      secretName: ops-api-tls-letsencrypt
+      {{- else }}
+      secretName: {{ .Values.ingress.TLSsecretName }}
+      {{- end }}

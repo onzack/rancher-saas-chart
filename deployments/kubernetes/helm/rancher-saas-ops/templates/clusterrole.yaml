@@ -1,0 +1,28 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: rancher-saas-ops
+  name: rancher-saas-ops
+rules:
+- apiGroups:
+  - ""
+  - apps
+  - networking.k8s.io
+  resources:
+  - namespaces
+  - statefulsets
+  - statefulsets/scale
+  - services
+  - secrets
+  - ingresses
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete

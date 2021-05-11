@@ -1,0 +1,7 @@
+[
+  {
+    "id": "readiness",
+    "execute-command": "/opt/webhook-scripts/readiness.bash",
+    "include-command-output-in-response": true
+  }
+]

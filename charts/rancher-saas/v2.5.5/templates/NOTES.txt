@@ -1,2 +1,0 @@
-Rancher-SaaS instance {{ .Values.rancher.instanceName | quote }} was successfully deployed
-The Rancher instance is accessible via: "https://{{ .Values.rancher.instanceName }}.{{ .Values.ingress.domain }}"

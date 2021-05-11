@@ -1,0 +1,2 @@
+The Rancher SaaS OPS APIs were successbully deployed.
+Access the API via: "https://{{ .Values.ingress.host }}.{{ .Values.ingress.domain }}/hooks/[ deploy | update | start | stop ]"   

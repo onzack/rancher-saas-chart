@@ -1,0 +1,74 @@
+# Default values for Rancher SaaS API.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+timezone: "Europe/Zurich"
+namespace: rancher-saas-ops
+
+image:
+  repository: harbor.apps.lab.onzack.io/rancher-saas/rancher-saas-ops
+  tag: v0.1.54
+  imagePullSecret: REDACTED
+
+deployAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+updateAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+startAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+stopAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+deleteAPI:
+  replicas: 2
+  requests:
+    memory: 100Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+  
+token: REDACTED
+rancherClusterID: REDACTED
+rancherProjectID: REDACTED
+environmentConfigMap: default-values
+environmentValuesFile: /etc/rancher-saas/environment.yaml
+
+ingress:
+  letsEncrypt:
+    enabled: false
+  # Domain for ingress host, added to instanceName
+  host: rancher-saas-ops
+  domain: example.com
+  # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
+  TLSsecretName: custom-ingress-tls
+  # TLSkey: REDACTED
+  # TLScert: REDACTED
+  # CAcert: REDACTED

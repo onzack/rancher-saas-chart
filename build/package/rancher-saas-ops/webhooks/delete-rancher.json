@@ -1,0 +1,31 @@
+[
+  {
+    "id": "delete",
+    "execute-command": "/opt/webhook-scripts/delete-rancher.bash",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command":
+    [
+      {
+        "source": "payload",
+        "name": "instance_name"
+      },
+      {
+        "source": "payload",
+        "name": "job_id"
+      }
+    ],
+    "trigger-rule":
+    {
+      "match":
+      {
+        "type": "value",
+        "value": "{{ getenv "TOKEN" | js }}",
+        "parameter":
+        {
+          "source": "payload",
+          "name": "token"
+        }
+      }
+    }
+  }
+]

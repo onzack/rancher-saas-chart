@@ -1,0 +1,109 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rancher-saas-ops
+    role: deploy-api
+  name: deploy-api
+spec:
+  replicas: {{ .Values.deployAPI.replicas }}
+  selector:
+    matchLabels:
+      app: rancher-saas-ops
+      role: deploy-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rancher-saas-ops
+        role: deploy-api
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - deploy-api
+            topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+      containers:
+      - name: deploy-api
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        args:
+          - -hooks=/etc/webhooks/readiness.json
+          - -hooks=/etc/webhooks/deploy-rancher.json
+          - -template
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+              - ALL
+        ports:
+        - containerPort: 9000
+        env:
+          - name: TZ
+            value: {{ .Values.timezone }}
+          - name: TOKEN
+            value: {{ .Values.token }}
+          - name: DOMAIN
+            value: {{ .Values.ingress.domain }}
+          - name: INGRESS_KEY_BASE64
+            value: {{ .Values.ingress.TLSkey }}
+          - name: INGRESS_CRT_BASE64
+            value: {{ .Values.ingress.TLScert }}
+          - name: INGRESS_CA_CRT_BASE64
+            value: {{ .Values.ingress.CAcert }}
+          - name: RANCHER_CLUSTER_ID
+            value: {{ .Values.rancherClusterID }}
+          - name: RANCHER_PROJECT_ID
+            value: {{ .Values.rancherProjectID }}
+          - name: ENVIRONMENT_VALUES_FILE
+            value: {{ .Values.environmentValuesFile }}
+        resources:
+          requests:
+            memory: {{ .Values.deployAPI.requests.memory | quote }}
+            cpu: {{ .Values.deployAPI.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.deployAPI.limits.memory | quote }}
+            cpu: {{ .Values.deployAPI.limits.cpu | quote }}
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+          tcpSocket:
+            port: 9000 
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+          httpGet:
+            path: /hooks/readiness
+            port: 9000
+        volumeMounts:
+          - name: environment-values
+            mountPath: {{ .Values.environmentValuesFile }}
+            subPath: environment.yaml
+      volumes:
+        - name: environment-values
+          configMap:
+            name: {{ .Values.environmentConfigMap }}
+      serviceAccountName: rancher-saas-ops
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecret }}

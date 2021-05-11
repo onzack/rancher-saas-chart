@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stop-api
+spec:
+  selector:
+    app: rancher-saas-ops
+    role: stop-api
+  ports:
+  - name: hattp
+    protocol: TCP
+    port: 9000
+    targetPort: 9000

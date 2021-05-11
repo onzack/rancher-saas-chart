@@ -1,0 +1,72 @@
+# Default values for Rancher SaaS.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+timezone: "Europe/Zurich"
+
+rancher:
+  instanceName: "rancher-saas-dev"
+  repository: rancher/rancher
+  tag: v2.4.14
+  size: S
+  twoPointFive: false
+  ## The following values are defined in the size-[S|M|L].yaml files
+  # requests:
+  #   memory: 800Mi
+  #   cpu: 150m
+  # limits:
+  #   memory: 2.5Gi
+  #   cpu: 600m
+
+rancherGuard:
+  # You can only enable rancherGuard, if storage is enabled aswell
+  enabled: false
+  repository: quay.io/rancher-guard
+  tag: v2020-09-beta1
+  backupFilesPath: backups
+  requests:
+    memory: 15Mi
+    cpu: 2m
+  limits:
+    memory: 40Mi
+    cpu: 400m
+  # InfluxDB URL, e.g. http://influxdb.example.com
+  influxDBUrl:
+  # InfluxDB Port, only non encryptet ports supported at the moment
+  influxDBPort: 80
+  influxDBName:
+  secretName: rancher-guard-secret
+  influxDBUser: REDACTED
+  influxDBPW: REDACTED
+  okLogTarget: /proc/1/fd/1
+  errorLogTarget: /proc/1/fd/2
+  metricsFile: /tmp/metrics.txt
+
+storage:
+  enabled: false
+  rancherGuardVolumeMountPath: /mnt/rancher-guard
+  ## The following values are defined in the size-[S|M|L].yaml files
+  # rancherVolumeSize: 5Gi
+  # rancherGuardVolumeSize: 4Gi
+  rancherVolumeName: rancher-volume
+  rancherGuardVolumeName: rancher-guard-volume
+  storageClassName: longhorn
+
+auditLog:
+  path: auditlog/
+  level: 2
+  maxAge: 30
+  maxBackup: 20
+  maxSize: 100
+
+ingress:
+  letsEncrypt:
+    enabled: false
+  # Domain for ingress host, added to instanceName
+  domain: example.com
+  # TLS key and cert for the ingress tls secret -> needed if letsEncrypt is disabled
+  TLSsecretName: custom-ingress-tls
+  TLSkey: REDACTED
+  TLScert: REDACTED
+  CAsecretName: custom-ingress-ca
+  CAcert: REDACTED

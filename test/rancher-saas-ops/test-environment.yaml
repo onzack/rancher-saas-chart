@@ -1,0 +1,16 @@
+# Infrastructure environemnt specific values for Rancher SaaS.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+rancher:
+  tag: v2.4.13
+
+rancherGuard:
+  enabled: false
+
+storage:
+  enabled: false
+
+ingress:
+  letsEncrypt:
+    enabled: false
