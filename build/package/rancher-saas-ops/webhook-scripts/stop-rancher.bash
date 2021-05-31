@@ -10,12 +10,14 @@ export STARTTIME=$(date +%s%3N)
 source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Job ID, integer
+# $1: Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Job ID, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
-export readonly JOB_ID="$2"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
+export readonly JOB_ID="$3"
 
 ## Define global variables
 STOP_PREFLIGHT_CHECK="undefined"
@@ -25,10 +27,10 @@ STOP_STAGE="stop"
 logToStdout $STOP_STAGE "INFO" "START Rancher $INSTANCE_NAME scale down to 0"
 
 ## Check needed arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
   STOP_PREFLIGHT_CHECK="error"
   logToStderr $STOP_STAGE "Not the correct amount of arguments passed, expected 2"
-  logToStderr $STOP_STAGE "Pass the following arguments: instance-name, job-id"
+  logToStderr $STOP_STAGE "Pass the following arguments: object-id, instance-name, job-id"
 fi
 
 ## Check kube-api connection

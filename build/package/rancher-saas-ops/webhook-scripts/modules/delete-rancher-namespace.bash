@@ -8,22 +8,25 @@
 source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Job ID, integer
+# $1: Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Job ID, integer
+# $4: Initial start time, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
-readonly JOB_ID="$2"
-readonly INITIALSTARTTIME="$3"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
+export readonly JOB_ID="$3"
+readonly INITIALSTARTTIME="$4"
 
 ## Define variables
 DELETE_NAMESPACE_STAGE="deltenamespace"
 
 ## Check needed arguments
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
   ENV_CHECK="error"
   logToStderr $DELETE_NAMESPACE_STAGE "Not the correct amount of arguments passed, expected 3"
-  logToStderr $DELETE_NAMESPACE_STAGE "Pass the following arguments: instance-name, job-id and initial starttime"
+  logToStderr $DELETE_NAMESPACE_STAGE "Pass the following arguments: object-id, instance-name, job-id and initial starttime"
 fi
 
 ## Check ENV_CHECK before proceede wiht actual script

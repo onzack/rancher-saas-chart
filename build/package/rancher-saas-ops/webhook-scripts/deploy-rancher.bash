@@ -19,17 +19,19 @@ source /opt/webhook-scripts/modules/logging.bash
 # RANCHER_PROJECT_ID
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Rancher SaaS size, like: S, M, or L
-# $3: Rancher SaaS admin password
-# $4: Job ID, integer
+# $1: Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Rancher SaaS size, like: S, M, or L
+# $4: Rancher SaaS admin password
+# $5: Job ID, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
 ### Convert size character to uppercase
-readonly SIZE="${2^^}"
-readonly ADMIN_PW="$3"
-export readonly JOB_ID="$4"
+readonly SIZE="${3^^}"
+readonly ADMIN_PW="$4"
+export readonly JOB_ID="$5"
 
 ## Define global variables
 DEPLOY_PREFLIGHT_CHECK="undefined"
@@ -50,7 +52,7 @@ if (( $? != "0" ))
 fi
 
 ## Check needed arguments
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
   DEPLOY_PREFLIGHT_CHECK="error"
   logToStderr $DEPLOY_STAGE "Not the correct amount of arguments passed, expected 4"
   logToStderr $DEPLOY_STAGE "Pass the following arguments: instance-name, size, password, job-id"
@@ -118,7 +120,7 @@ fi
 
 # Start the script for the initial rancher configuration and send it to the background
 logToStdout $DEPLOY_STAGE "INFO" "Start initial rancher configuration script"
-tmux new -d /opt/webhook-scripts/modules/initially-configure-rancher.bash $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
+tmux new -d /opt/webhook-scripts/modules/initially-configure-rancher.bash $OBJECT_ID $INSTANCE_NAME $ADMIN_PW $JOB_ID $STARTTIME
 
 unset DEPLOY_STAGE
 exit 0

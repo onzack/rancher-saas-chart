@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: rancher-saas-ops
-  name: rancher-saas-ops
+  name: rancher-saas-ops-{{ .Values.stage }}
 rules:
 - apiGroups:
   - ""
