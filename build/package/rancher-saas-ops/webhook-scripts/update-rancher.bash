@@ -23,10 +23,11 @@ source /opt/webhook-scripts/modules/logging.bash
 # $4: Job ID, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
 ### Convert size character to uppercase
-readonly SIZE="${2^^}"
-readonly JOB_ID="$3"
+readonly SIZE="${3^^}"
+export readonly JOB_ID="$4"
 
 ## Define global variables
 UPDATE_PREFLIGHT_CHECK="undefined"

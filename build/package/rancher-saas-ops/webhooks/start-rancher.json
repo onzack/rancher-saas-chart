@@ -7,11 +7,11 @@
     [
       {
         "source": "payload",
-        "name": "instance_name"
+        "name": "object_id"
       },
       {
         "source": "payload",
-        "name": "object_id"
+        "name": "instance_name"
       },
       {
         "source": "payload",
