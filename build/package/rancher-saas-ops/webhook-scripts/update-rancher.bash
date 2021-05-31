@@ -17,9 +17,10 @@ source /opt/webhook-scripts/modules/logging.bash
 # DOMAIN
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Rancher SaaS size, like: S, M, or L
-# $3: Job ID, integer
+# $1: Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Rancher SaaS size, like: S, M, or L
+# $4: Job ID, integer
 
 ## Save passed arguments
 readonly INSTANCE_NAME="$1"
@@ -46,10 +47,10 @@ if (( $? != "0" ))
 fi
 
 ## Check needed arguments
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
   UPDATE_PREFLIGHT_CHECK="error"
   logToStderr $UPDATE_STAGE "Not the correct amount of arguments passed, expected 3"
-  logToStderr $UPDATE_STAGE "Pass the following arguments: instance-name, size, job-id"
+  logToStderr $UPDATE_STAGE "Pass the following arguments: object-id, instance-name, size, job-id"
 fi
 
 ## Check kube-api connection
@@ -93,7 +94,7 @@ fi
 
 # Start the script for the initial rancher configuration and send it to the background
 logToStdout $UPDATE_STAGE "INFO" "Start health check script"
-tmux new -d /opt/webhook-scripts/modules/check-rancher-health.bash $INSTANCE_NAME $JOB_ID $STARTTIME update
+tmux new -d /opt/webhook-scripts/modules/check-rancher-health.bash $OBJECT_ID $INSTANCE_NAME $JOB_ID $STARTTIME update
 
 unset UPDATE_STAGE
 exit 0

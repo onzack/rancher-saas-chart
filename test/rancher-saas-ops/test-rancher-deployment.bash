@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## ATTENTION
+# Does not work any more as the modules are not in the correct place
+
 ## Check if directory /etc/rancher-saas exists
 if [ ! -d /etc/rancher-saas ]
   then
@@ -15,5 +18,5 @@ if [ ! -f $ENVIRONMENT_VALUES_FILE ]
 fi
 
 cp -rp ./deployments/kubernetes/helm/rancher-saas /etc/rancher-saas/helm
-./build/package/rancher-saas-ops/webhook-scripts/deploy-rancher.bash $1 $2 $3 $4
+./build/package/rancher-saas-ops/webhook-scripts/deploy-rancher.bash $1 $2 $3 $4 $5
 rm -rf /etc/rancher-saas/helm

@@ -4,12 +4,12 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: rancher-saas-ops
-  name: rancher-saas-ops
+  name: rancher-saas-ops-{{ .Values.stage }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: rancher-saas-ops
+  name: rancher-saas-ops-{{ .Values.stage }}
 subjects:
 - kind: ServiceAccount
-  name: rancher-saas-ops
+  name: rancher-saas-ops-{{ .Values.stage }}
   namespace: {{ .Values.namespace }}

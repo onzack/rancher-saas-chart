@@ -5,16 +5,19 @@
 source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Rancher SaaS admin password
-# $3: Job ID, integer
-# $4: initial starttime, integer
+# $1: Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Rancher SaaS admin password
+# $4: Job ID, integer
+# $5: initial starttime, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
-readonly ADMIN_PW="$2"
-readonly JOB_ID="$3"
-readonly INITIALSTARTTIME="$4"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
+readonly ADMIN_PW="$3"
+export readonly JOB_ID="$4"
+readonly INITIALSTARTTIME="$5"
+
 
 ## Define variables
 CONFIG_STAGE="configuration"
@@ -27,10 +30,10 @@ cleanup () {
 }
 
 ## Check needed arguments
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
   ENV_CHECK="error"
   logToStderr $CONFIG_STAGE "Not the correct amount of arguments passed, expected 4"
-  logToStderr $CONFIG_STAGE "Pass the following arguments: instance-name, password, job-id, initial starttime"
+  logToStderr $CONFIG_STAGE "Pass the following arguments: object-id, instance-name, password, job-id, initial starttime"
 fi
 
 ## Check ENV_CHECK before proceede wiht actual script
