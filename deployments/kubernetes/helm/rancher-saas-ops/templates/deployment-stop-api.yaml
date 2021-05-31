@@ -84,6 +84,6 @@ spec:
           httpGet:
             path: /hooks/readiness
             port: 9000
-      serviceAccountName: rancher-saas-ops
+      serviceAccountName: rancher-saas-ops-{{ .Values.stage }}
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}

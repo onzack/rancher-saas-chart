@@ -104,6 +104,6 @@ spec:
         - name: environment-values
           configMap:
             name: {{ .Values.environmentConfigMap }}
-      serviceAccountName: rancher-saas-ops
+      serviceAccountName: rancher-saas-ops-{{ .Values.stage }}
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}
