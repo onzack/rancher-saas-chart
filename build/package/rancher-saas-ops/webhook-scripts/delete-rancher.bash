@@ -10,12 +10,14 @@ export STARTTIME=$(date +%s%3N)
 source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Job ID, integer
+# $1: Object ID: integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Job ID, integer
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
-export readonly JOB_ID="$2"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
+export readonly JOB_ID="$3"
 
 ## Define global variables
 DELETE_PREFLIGHT_CHECK="undefined"
@@ -25,10 +27,10 @@ DELETE_STAGE="delete"
 logToStdout $DELETE_STAGE "INFO" "START Rancher $INSTANCE_NAME deletion"
 
 ## Check needed arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
   DELETE_PREFLIGHT_CHECK="error"
   logToStderr $DELETE_STAGE "Not the correct amount of arguments passed, expected 2"
-  logToStderr $DELETE_STAGE "Pass the following arguments: instance-name, job-id"
+  logToStderr $DELETE_STAGE "Pass the following arguments: object-id, instance-name, job-id"
 fi
 
 ## Check kube-api connection
@@ -48,8 +50,8 @@ fi
 
 ## The actual script
 # Start the script for the initial rancher configuration and send it to the background
-logToStdout $START_STAGE "INFO" "Start health check script"
-tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $INSTANCE_NAME $JOB_ID $STARTTIME
+logToStdout $DELETE_STAGE "INFO" "Start health check script"
+tmux new -d /opt/webhook-scripts/modules/delete-rancher-namespace.bash $OBJECT_ID $INSTANCE_NAME $JOB_ID $STARTTIME
 
 webhookResponse "deleting" "Successfully sent delete command for $INSTANCE_NAME"
 unset DELETE_STAGE

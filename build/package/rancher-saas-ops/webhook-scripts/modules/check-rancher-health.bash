@@ -8,25 +8,28 @@
 source /opt/webhook-scripts/modules/logging.bash
 
 ## Expected arguments
-# $1: Rancher SaaS instance name, like: rancher-saas-dev
-# $2: Job ID, integer
-# $3 initial starttime, integer
+# $1 Object ID, integer
+# $2: Rancher SaaS instance name, like: rancher-saas-dev
+# $3: Job ID, integer
+# $4 initial starttime, integer
+# $5 Action, update or start
 
 ## Save passed arguments
-readonly INSTANCE_NAME="$1"
-readonly JOB_ID="$2"
-readonly INITIALSTARTTIME="$3"
-readonly ACTION="$4"
+export readonly OBJECT_ID="$1"
+readonly INSTANCE_NAME="$2"
+export readonly JOB_ID="$3"
+readonly INITIALSTARTTIME="$4"
+readonly ACTION="$5"
 
 
 ## Define variables
 HEALTH_CHECK_STAGE="healthcheck"
 
 ## Check needed arguments
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
   ENV_CHECK="error"
   logToStderr $HEALTH_CHECK_STAGE "Not the correct amount of arguments passed, expected 4"
-  logToStderr $HEALTH_CHECK_STAGE "Pass the following arguments: instance-name, job-id, initial starttime and action"
+  logToStderr $HEALTH_CHECK_STAGE "Pass the following arguments: object-id, instance-name, job-id, initial starttime and action"
 fi
 
 ## Check ENV_CHECK before proceede wiht actual script
